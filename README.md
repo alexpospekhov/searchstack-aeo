@@ -2,6 +2,7 @@
 
 > Open-source AEO / GEO / SEO tech stack for AI-native founders.
 
+[![PyPI](https://img.shields.io/pypi/v/searchstack.svg)](https://pypi.org/project/searchstack/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
