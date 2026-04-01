@@ -57,10 +57,13 @@ The bottom 5 rows are what no existing tool does. That's why searchstack exists.
 - **Technical Audit** — meta tags, JSON-LD validation, internal linking, orphan pages, on-page scoring
 - **Traffic Analytics** — Plausible integration with AI referral breakdown (chatgpt.com, perplexity.ai, claude.ai)
 - **Search Submission** — IndexNow (instant Bing/Yandex), Bing Webmaster, GSC sitemap resubmit
+- **llms.txt Generator** — `searchstack llms generate` creates llms.txt + llms-full.txt from your sitemap following the [llmstxt.org](https://llmstxt.org) spec. Validate with `searchstack llms validate`.
+- **Content Monitor** — `searchstack monitor` shows per-page performance: rankings, clicks, indexing status, keyword tracking, changes since last check.
+- **SEO Audit** — `searchstack audit` combines GSC data with keyword volumes, calculates opportunity scores, finds content gaps.
 - **Markdown Reports** — `searchstack report` generates a full 14-section .md file with executive summary and auto-recommendations. Run it monthly, diff the results, track progress over time.
 - **Cron-ready** — pure CLI, no GUI, no browser. Deploy on any server, schedule via cron (`0 8 * * 1 searchstack report`), pipe output to Slack/email. Built for automation.
 
-**19 commands. 9 API integrations. One config file. Runs anywhere Python runs.**
+**22 commands. 9 API integrations. One config file. Runs anywhere Python runs.**
 
 ```
 $ searchstack ai
@@ -173,8 +176,12 @@ searchstack ai                       # citation check: ChatGPT + Perplexity + Cl
 searchstack ai chatgpt               # ChatGPT only
 searchstack ai perplexity            # Perplexity only
 searchstack ai claude                # Claude only
+searchstack ai grok                  # Grok (xAI) only
 searchstack geo                      # Google AI Overview for all target keywords
 searchstack geo "your keyword"       # single keyword check
+searchstack llms generate            # generate llms.txt + llms-full.txt from your sitemap
+searchstack llms validate            # validate existing llms.txt against spec
+searchstack llms check               # check if your site has AI-ready files
 ```
 
 ### SEO — Google Rankings & Research
@@ -214,9 +221,11 @@ searchstack bing submit              # submit URLs to Bing
 searchstack gsc resubmit             # resubmit sitemap to Google
 ```
 
-### Reporting
+### Dashboards & Reporting
 
 ```bash
+searchstack monitor                  # site health: traffic + rankings + indexing per page
+searchstack audit                    # full SEO audit with keyword volumes + opportunity scores
 searchstack report                   # full Markdown report (14 sections)
 ```
 
@@ -495,7 +504,7 @@ Microsoft invested $13B in OpenAI. As part of the deal, ChatGPT Search uses Bing
 - [ ] `searchstack dashboard` — local HTML dashboard
 - [ ] Reddit, HackerNews, Twitter mention tracking
 - [ ] YouTube search visibility
-- [ ] llms.txt generation and validation
+- [x] ~~llms.txt generation and validation~~ (shipped in v0.1.0)
 - [ ] GitHub Actions integration for CI/CD monitoring
 
 ---

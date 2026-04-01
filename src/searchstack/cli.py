@@ -31,6 +31,7 @@ COMMANDS: dict[str, str] = {
     "report": "searchstack.commands.report",
     "monitor": "searchstack.commands.monitor",
     "audit": "searchstack.commands.audit",
+    "llms": "searchstack.commands.llms",
 }
 
 
@@ -70,6 +71,9 @@ Traffic & Submission:
 Dashboards:
   monitor              Site health dashboard (traffic, rankings, indexing)
   audit                Full SEO audit with keyword volumes + opportunity scores
+
+AEO Content:
+  llms [sub]           llms.txt generator + validator (generate, validate, check)
 
 Reporting:
   report               Full 14-section Markdown report
