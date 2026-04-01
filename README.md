@@ -7,6 +7,21 @@
 
 Monitor your visibility across Google, AI Overviews, ChatGPT, Perplexity & Claude — from one CLI.
 
+### What's inside
+
+- **AEO Monitor** — check if ChatGPT, Perplexity, and Claude cite your site when users ask about your niche
+- **GEO Monitor** — track Google AI Overview: who gets cited for your target keywords (and whether it's you)
+- **Google Search Console** — rankings, clicks, impressions, CTR, indexing status, sitemap health
+- **Keyword Research** — suggestions, volumes, competitor overlap, keyword gaps (DataForSEO)
+- **Position Tracking** — compare rankings over time, detect improvements and drops
+- **Backlink Analysis** — your profile + competitor backlinks, referring domains, domain rank
+- **Technical Audit** — meta tags, JSON-LD validation, internal linking, orphan pages, on-page scoring
+- **Traffic Analytics** — Plausible integration with AI referral breakdown (chatgpt.com, perplexity.ai, claude.ai)
+- **Search Submission** — IndexNow (instant Bing/Yandex), Bing Webmaster, GSC sitemap resubmit
+- **Markdown Reports** — full 14-section report with executive summary and auto-recommendations
+
+**19 commands. 8 API integrations. One config file.**
+
 ```
 $ searchstack ai
 
