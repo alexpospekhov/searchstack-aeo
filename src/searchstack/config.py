@@ -60,6 +60,17 @@ class IndexnowConfig:
 
 
 @dataclass
+class GoogleAdsConfig:
+    customer_id: str = ""
+    developer_token: str = ""
+    client_id: str = ""
+    client_secret: str = ""
+    refresh_token: str = ""
+    location_code: int = 2840
+    language_code: str = "en"
+
+
+@dataclass
 class Config:
     domain: str = ""
     sitemap: str = ""
@@ -72,6 +83,7 @@ class Config:
     plausible: PlausibleConfig = field(default_factory=PlausibleConfig)
     bing: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     indexnow: IndexnowConfig = field(default_factory=IndexnowConfig)
+    google_ads: GoogleAdsConfig = field(default_factory=GoogleAdsConfig)
     ai_queries: list[str] = field(default_factory=list)
     geo_keywords: dict[str, list[str]] = field(default_factory=dict)
     competitors: list[str] = field(default_factory=list)
@@ -109,6 +121,7 @@ def _build_config(raw: dict[str, Any]) -> Config:
     gsc_raw = raw.get("gsc", {})
     dfs_raw = raw.get("dataforseo", {})
     plausible_raw = raw.get("plausible", {})
+    ga_raw = raw.get("google_ads", {})
 
     return Config(
         domain=raw.get("domain", ""),
@@ -134,6 +147,15 @@ def _build_config(raw: dict[str, Any]) -> Config:
         ),
         bing=ApiKeyConfig(api_key=_get_nested(raw, "bing", "api_key")),
         indexnow=IndexnowConfig(key=_get_nested(raw, "indexnow", "key")),
+        google_ads=GoogleAdsConfig(
+            customer_id=ga_raw.get("customer_id", ""),
+            developer_token=ga_raw.get("developer_token", ""),
+            client_id=ga_raw.get("client_id", ""),
+            client_secret=ga_raw.get("client_secret", ""),
+            refresh_token=ga_raw.get("refresh_token", ""),
+            location_code=ga_raw.get("location_code", 2840),
+            language_code=ga_raw.get("language_code", "en"),
+        ),
         ai_queries=raw.get("ai_queries", []),
         geo_keywords=raw.get("geo_keywords", {}),
         competitors=raw.get("competitors", []),
@@ -149,6 +171,8 @@ _ENV_MAP: dict[str, tuple[str, ...]] = {
     "XAI_API_KEY": ("grok", "api_key"),
     "PLAUSIBLE_API_KEY": ("plausible", "api_key"),
     "BING_WEBMASTER_API_KEY": ("bing", "api_key"),
+    "GOOGLE_ADS_DEVELOPER_TOKEN": ("google_ads", "developer_token"),
+    "GOOGLE_ADS_CUSTOMER_ID": ("google_ads", "customer_id"),
 }
 
 

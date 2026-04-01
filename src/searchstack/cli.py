@@ -29,6 +29,8 @@ COMMANDS: dict[str, str] = {
     "indexnow": "searchstack.commands.indexnow",
     "bing": "searchstack.commands.bing_cmd",
     "report": "searchstack.commands.report",
+    "monitor": "searchstack.commands.monitor",
+    "audit": "searchstack.commands.audit",
 }
 
 
@@ -64,6 +66,10 @@ Traffic & Submission:
   traffic              Plausible analytics + AI referral tracking
   indexnow             Submit URLs to Bing + Yandex via IndexNow
   bing [sub]           Bing Webmaster stats (submit, stats)
+
+Dashboards:
+  monitor              Site health dashboard (traffic, rankings, indexing)
+  audit                Full SEO audit with keyword volumes + opportunity scores
 
 Reporting:
   report               Full 14-section Markdown report
