@@ -49,6 +49,64 @@ $ searchstack ai
 
 ---
 
+## Who is this for
+
+- **AI-native founders** — you're building a product and need to be visible in both Google AND AI search, but don't have $400/mo for Semrush
+- **Indie hackers & solo devs** — you ship content, want to know if it's working, and prefer CLI over dashboards
+- **SEO-aware engineers** — you understand technical SEO but need a tool that also covers the new AEO/GEO landscape
+- **Agency operators** — you manage SEO for multiple clients and need automated reports you can schedule and pipe to Slack
+
+If you've ever wondered *"Does ChatGPT know my product exists?"* — this tool answers that question.
+
+---
+
+## searchstack vs The Rest
+
+| Feature | searchstack | Ahrefs ($99+/mo) | Semrush ($130+/mo) | Free tools |
+|---------|:-----------:|:-----------------:|:-------------------:|:----------:|
+| Google rankings (GSC) | ✅ | ✅ | ✅ | ✅ GSC only |
+| Keyword research | ✅ | ✅ | ✅ | ❌ |
+| Backlink analysis | ✅ | ✅ | ✅ | ❌ |
+| Technical audit | ✅ | ✅ | ✅ | Partial |
+| **ChatGPT citation check** | ✅ | ❌ | ❌ | ❌ |
+| **Perplexity citation check** | ✅ | ❌ | ❌ | ❌ |
+| **Claude citation check** | ✅ | ❌ | ❌ | ❌ |
+| **Google AI Overview monitor** | ✅ | ❌ | ❌ | ❌ |
+| **AI referral tracking** | ✅ | ❌ | ❌ | ❌ |
+| CLI / scriptable | ✅ | ❌ | ❌ | ❌ |
+| Cron / server deploy | ✅ | ❌ | ❌ | ❌ |
+| Markdown reports | ✅ | ❌ PDF only | ❌ PDF only | ❌ |
+| Open source | ✅ | ❌ | ❌ | Varies |
+| Monthly cost | **~$5** | $99-999 | $130-500 | $0 (limited) |
+
+The bottom 5 rows are what no existing tool does. That's why searchstack exists.
+
+---
+
+## Try it free (no API keys needed)
+
+These commands work with zero configuration — they just crawl your sitemap:
+
+```bash
+pip install searchstack
+
+# Check meta tags on all your pages
+searchstack meta
+
+# Validate JSON-LD structured data
+searchstack schema
+
+# Find orphan pages (no internal links)
+searchstack links
+
+# Full on-page SEO score for any URL
+searchstack onpage https://yoursite.com/pricing
+```
+
+No API keys. No accounts. No config file. Just install and run.
+
+---
+
 ## The Problem
 
 Google page 1 isn't enough anymore. **60% of Google searches now show an AI Overview** that answers the query directly. ChatGPT and Perplexity are becoming primary search tools for millions of users.
@@ -201,6 +259,58 @@ Monthly cost: **$5-10** for full daily monitoring, **$1-2** for weekly AEO/GEO o
 | 13 | Orphan pages | Sitemap crawl |
 | 14 | Recommendations | Auto-generated |
 
+### Sample report output
+
+<details>
+<summary>Click to expand a report fragment</summary>
+
+```markdown
+# SEO/AEO/GEO Report — 01-04-2026
+
+> yoursite.com | Generated 2026-04-01 09:00
+
+## Executive Summary
+
+| Metric | Value |
+|--------|-------|
+| Visitors (30 days) | **1,247** |
+| Google AI cites us | **0** times |
+| Backlinks | 89 (from 23 domains) |
+| Keyword gaps (not in top-10) | 12 |
+| Positions: improved / declined | 5 / 2 |
+
+**Status:** 🟡 Growing
+
+## 3. Google AI Overview visibility (GEO)
+
+- Keywords checked: 23
+- AI Overview present: 18/23
+- **AI cites us: 0**
+- Organic top-10: 7
+
+### Top Cited (instead of us)
+
+| Domain | Times cited |
+|--------|------------|
+| competitor1.com | 8 |
+| competitor2.com | 5 |
+| wikipedia.org | 4 |
+
+## 4. AI chatbot citations (AEO)
+
+- ✅ **ChatGPT**: 3/8 queries cite us
+- ✅ **Perplexity**: 5/8 queries cite us
+- ❌ **Claude**: 0/8 queries cite us
+
+## Recommendations
+
+- 🤖 **Google AI never cites us** — improve citation-ready content
+- 🎯 **12 keyword gaps** — update existing articles for these queries
+- 🔗 **Low backlinks (23 domains)** — need outreach campaign
+```
+
+</details>
+
 ---
 
 ## Configuration
@@ -317,6 +427,57 @@ CMD ["searchstack", "report"]
 | **[Services Setup Guide](docs/SERVICES.md)** | Step-by-step setup for all 8 services, full config template, verification checklist |
 | **[AEO/GEO Explained](docs/AEO-GEO-EXPLAINED.md)** | How AI search works, which models power which search engines, why Bing matters, monitoring strategy |
 | **[Detailed Reference](docs/DETAILED-REFERENCE.md)** | Deep dive into every feature, command, and service |
+
+---
+
+## FAQ
+
+<details>
+<summary><strong>Do I need all 8 services?</strong></summary>
+
+No. Each command gracefully skips unavailable services. You can start with just the free tools (`meta`, `schema`, `links`, `onpage`) and add API keys as needed. The most impactful paid service is DataForSEO ($50 one-time) — it unlocks GEO monitoring, keyword research, and competitor analysis.
+
+</details>
+
+<details>
+<summary><strong>How much does it actually cost per month?</strong></summary>
+
+- **$0/mo** — GSC + technical audit (meta, schema, links, onpage, pages)
+- **$1-2/mo** — add weekly AEO + GEO monitoring
+- **$5-10/mo** — full daily monitoring including all API calls
+- **$50 one-time** — DataForSEO deposit (lasts months, no subscription)
+
+Compare: Ahrefs starts at $99/mo, Semrush at $130/mo, and neither tracks AI visibility.
+
+</details>
+
+<details>
+<summary><strong>Does searchstack work without DataForSEO?</strong></summary>
+
+Yes. Without DataForSEO you lose: keyword research, live SERP, GEO monitoring, competitor analysis, backlink checks, and position tracking. You keep: GSC rankings, AEO citation checks (ChatGPT/Perplexity/Claude), Plausible traffic, technical audit, Bing submission, and IndexNow.
+
+</details>
+
+<details>
+<summary><strong>Is this a replacement for Ahrefs/Semrush?</strong></summary>
+
+For technical SEO and AI search monitoring — yes. For features like site explorer, content gap analysis at scale, or rank tracking with 10,000+ keywords — no. searchstack is designed for founders and small teams who need the most impactful SEO data without enterprise pricing.
+
+</details>
+
+<details>
+<summary><strong>Can I monitor multiple sites?</strong></summary>
+
+Currently one site per config file. For multiple sites, use separate `.searchstack.toml` files and run with `--config` flag (coming soon) or separate directories.
+
+</details>
+
+<details>
+<summary><strong>Why does ChatGPT Search use Bing?</strong></summary>
+
+Microsoft invested $13B in OpenAI. As part of the deal, ChatGPT Search uses Bing as its search backend. Perplexity and Microsoft Copilot also use Bing. This means **3 out of 5 major AI search products** pull from Bing, not Google. Read more in [AEO/GEO Explained](docs/AEO-GEO-EXPLAINED.md#the-critical-role-of-bing).
+
+</details>
 
 ---
 

@@ -1,0 +1,31 @@
+# searchstack
+
+> Open-source SEO / AEO / GEO tech stack for AI-native founders.
+
+searchstack is a Python CLI tool that monitors your website's visibility across Google organic search, Google AI Overviews, ChatGPT, Perplexity, and Claude. It combines traditional SEO monitoring (Google Search Console, keyword research, backlinks, technical audit) with AI-era search monitoring (AEO citation checks across 3 AI chatbots, GEO monitoring of Google AI Overview citations).
+
+## Key capabilities
+
+- Check if ChatGPT, Perplexity, and Claude cite your website when asked relevant questions
+- Monitor Google AI Overview to see which domains get cited for your target keywords
+- Track Google Search Console rankings, clicks, impressions, and indexing status
+- Research keywords, analyze competitors, find keyword gaps
+- Run technical SEO audits (meta tags, JSON-LD, internal linking, orphan pages)
+- Track AI referral traffic from chatgpt.com, perplexity.ai, claude.ai via Plausible
+- Submit URLs to Bing and Yandex via IndexNow for faster AI search indexing
+- Generate 14-section Markdown reports with auto-recommendations
+- Deploy on servers with cron for automated monitoring
+
+## API integrations
+
+Google Search Console (free), DataForSEO (keywords, SERP, AI Overview, backlinks), OpenAI API (ChatGPT citation check), Perplexity API (citation check with source URLs), Anthropic API (Claude citation check), Plausible Analytics (traffic + AI referrals), Bing Webmaster Tools (Bing stats + URL submission), IndexNow (instant search engine notification).
+
+## Install
+
+pip install searchstack
+
+## Docs
+
+- [Services Setup Guide](docs/SERVICES.md)
+- [AEO/GEO Explained](docs/AEO-GEO-EXPLAINED.md)
+- [Detailed Reference](docs/DETAILED-REFERENCE.md)
