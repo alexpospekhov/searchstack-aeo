@@ -60,6 +60,13 @@ class IndexnowConfig:
 
 
 @dataclass
+class OllamaConfig:
+    base_url: str = "http://localhost:11434/v1"
+    model: str = ""
+    api_key: str = ""
+
+
+@dataclass
 class GoogleAdsConfig:
     customer_id: str = ""
     developer_token: str = ""
@@ -80,6 +87,7 @@ class Config:
     perplexity: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     anthropic: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     grok: ApiKeyConfig = field(default_factory=ApiKeyConfig)
+    ollama: OllamaConfig = field(default_factory=OllamaConfig)
     plausible: PlausibleConfig = field(default_factory=PlausibleConfig)
     bing: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     indexnow: IndexnowConfig = field(default_factory=IndexnowConfig)
@@ -141,6 +149,11 @@ def _build_config(raw: dict[str, Any]) -> Config:
         perplexity=ApiKeyConfig(api_key=_get_nested(raw, "perplexity", "api_key")),
         anthropic=ApiKeyConfig(api_key=_get_nested(raw, "anthropic", "api_key")),
         grok=ApiKeyConfig(api_key=_get_nested(raw, "grok", "api_key")),
+        ollama=OllamaConfig(
+            base_url=_get_nested(raw, "ollama", "base_url") or "http://localhost:11434/v1",
+            model=_get_nested(raw, "ollama", "model"),
+            api_key=_get_nested(raw, "ollama", "api_key"),
+        ),
         plausible=PlausibleConfig(
             api_key=plausible_raw.get("api_key", ""),
             site_id=plausible_raw.get("site_id", ""),

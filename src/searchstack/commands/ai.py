@@ -1,11 +1,11 @@
-"""AEO citation check across ChatGPT, Perplexity, Claude, and Grok."""
+"""AEO citation check across ChatGPT, Perplexity, Claude, Grok, and local models (Ollama)."""
 
 from __future__ import annotations
 
 from searchstack import snapshots
 from searchstack.config import Config
 
-PROVIDERS = ("chatgpt", "perplexity", "claude", "grok")
+PROVIDERS = ("chatgpt", "perplexity", "claude", "grok", "ollama")
 
 
 def _check_provider(
@@ -40,6 +40,12 @@ def _check_provider(
             return {"provider": provider, "results": [], "cited": 0, "total": 0}
         from searchstack.providers import grok
         check_fn = grok.check_citation
+    elif provider == "ollama":
+        if not config.ollama.model:
+            print(f"  Skipping Ollama -- [ollama] model not configured")
+            return {"provider": provider, "results": [], "cited": 0, "total": 0}
+        from searchstack.providers import ollama
+        check_fn = ollama.check_citation
     else:
         print(f"  Unknown provider: {provider}")
         return {"provider": provider, "results": [], "cited": 0, "total": 0}
@@ -113,6 +119,7 @@ def run(config: Config, *args: str) -> None:
             "perplexity": "Perplexity (sonar)",
             "claude": "Claude (haiku)",
             "grok": "Grok (grok-3-mini)",
+            "ollama": f"Ollama ({config.ollama.model or 'not configured'})",
         }.get(provider, provider)
 
         print(f"  {label}:")

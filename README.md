@@ -34,6 +34,7 @@ If you've ever wondered *"Does ChatGPT know my product exists?"* — this tool a
 | **Perplexity citation check** | ✅ | ❌ | ❌ | ❌ |
 | **Claude citation check** | ✅ | ❌ | ❌ | ❌ |
 | **Grok (xAI) citation check** | ✅ | ❌ | ❌ | ❌ |
+| **Local LLM check (Ollama)** | ✅ | ❌ | ❌ | ❌ |
 | **Google AI Overview monitor** | ✅ | ❌ | ❌ | ❌ |
 | **AI referral tracking** | ✅ | ❌ | ❌ | ❌ |
 | CLI / scriptable | ✅ | ❌ | ❌ | ❌ |
@@ -48,7 +49,7 @@ The bottom 5 rows are what no existing tool does. That's why searchstack exists.
 
 ### What's inside
 
-- **AEO Monitor** — check if ChatGPT, Perplexity, Claude, and Grok cite your site when users ask about your niche
+- **AEO Monitor** — check if ChatGPT, Perplexity, Claude, Grok, and **local models (Ollama/Qwen/Llama)** cite your site when users ask about your niche
 - **GEO Monitor** — track Google AI Overview: who gets cited for your target keywords (and whether it's you)
 - **Google Search Console** — rankings, clicks, impressions, CTR, indexing status, sitemap health
 - **Keyword Research** — suggestions, volumes, competitor overlap, keyword gaps (DataForSEO)
@@ -61,9 +62,10 @@ The bottom 5 rows are what no existing tool does. That's why searchstack exists.
 - **Content Monitor** — `searchstack monitor` shows per-page performance: rankings, clicks, indexing status, keyword tracking, changes since last check.
 - **SEO Audit** — `searchstack audit` combines GSC data with keyword volumes, calculates opportunity scores, finds content gaps.
 - **Markdown Reports** — `searchstack report` generates a full 14-section .md file with executive summary and auto-recommendations. Run it monthly, diff the results, track progress over time.
+- **Local LLM Support** — run AEO checks against Ollama, LM Studio, vLLM, or any OpenAI-compatible local model. Test how open-source models (Qwen, Llama, Mistral, Gemma) represent your brand — completely free, no API keys, runs offline.
 - **Cron-ready** — pure CLI, no GUI, no browser. Deploy on any server, schedule via cron (`0 8 * * 1 searchstack report`), pipe output to Slack/email. Built for automation.
 
-**22 commands. 9 API integrations. One config file. Runs anywhere Python runs.**
+**22 commands. 10 API integrations (5 cloud AI + local LLMs). One config file. Runs anywhere Python runs.**
 
 ```
 $ searchstack ai
@@ -177,6 +179,7 @@ searchstack ai chatgpt               # ChatGPT only
 searchstack ai perplexity            # Perplexity only
 searchstack ai claude                # Claude only
 searchstack ai grok                  # Grok (xAI) only
+searchstack ai ollama                # local model (Ollama/LM Studio/vLLM)
 searchstack geo                      # Google AI Overview for all target keywords
 searchstack geo "your keyword"       # single keyword check
 searchstack llms generate            # generate llms.txt + llms-full.txt from your sitemap
@@ -246,8 +249,39 @@ searchstack report                   # full Markdown report (14 sections)
 | 7 | **[Plausible](https://plausible.io)** | $9/mo | Traffic analytics, AI referral tracking |
 | 8 | **[Bing Webmaster](https://www.bing.com/webmasters)** | Free | Bing stats, URL submission |
 | 9 | **[IndexNow](https://www.indexnow.org)** | Free | Instant Bing/Yandex notification |
+| 10 | **[Ollama](https://ollama.com)** / any local LLM | Free | Test local models (Qwen, Llama, Mistral, Gemma) |
 
 **Why Bing matters:** ChatGPT Search, Perplexity, and Microsoft Copilot all use Bing as their search backend. If you're not in Bing, you're invisible to 3 major AI search products.
+
+### Local LLM setup (Ollama, LM Studio, vLLM)
+
+Run AEO checks against local models — free, offline, no API keys:
+
+```bash
+# 1. Install Ollama and pull a model
+brew install ollama
+ollama pull qwen3:8b
+
+# 2. Add to .searchstack.toml
+# [ollama]
+# base_url = "http://localhost:11434/v1"
+# model = "qwen3:8b"
+
+# 3. Run
+searchstack ai ollama
+```
+
+Works with any OpenAI-compatible server:
+
+| Server | Config `base_url` | Notes |
+|--------|------------------|-------|
+| **Ollama** | `http://localhost:11434/v1` | Default, easiest setup |
+| **LM Studio** | `http://localhost:1234/v1` | GUI for managing models |
+| **vLLM** | `http://localhost:8000/v1` | Production-grade serving |
+| **llama.cpp** | `http://localhost:8080/v1` | Lightweight C++ server |
+| **LocalAI** | `http://localhost:8080/v1` | Drop-in OpenAI replacement |
+
+**Why test local models?** Open-source LLMs (Qwen, Llama, Mistral, Gemma) are increasingly used in products, search tools, and agents. Knowing how they represent your brand helps you optimize content for the entire AI ecosystem — not just the big 4.
 
 Monthly cost: **$5-10** for full daily monitoring, **$1-2** for weekly AEO/GEO only, **$0** for GSC + technical audit.
 
