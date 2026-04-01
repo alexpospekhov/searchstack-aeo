@@ -33,6 +33,7 @@ If you've ever wondered *"Does ChatGPT know my product exists?"* — this tool a
 | **ChatGPT citation check** | ✅ | ❌ | ❌ | ❌ |
 | **Perplexity citation check** | ✅ | ❌ | ❌ | ❌ |
 | **Claude citation check** | ✅ | ❌ | ❌ | ❌ |
+| **Grok (xAI) citation check** | ✅ | ❌ | ❌ | ❌ |
 | **Google AI Overview monitor** | ✅ | ❌ | ❌ | ❌ |
 | **AI referral tracking** | ✅ | ❌ | ❌ | ❌ |
 | CLI / scriptable | ✅ | ❌ | ❌ | ❌ |
@@ -47,7 +48,7 @@ The bottom 5 rows are what no existing tool does. That's why searchstack exists.
 
 ### What's inside
 
-- **AEO Monitor** — check if ChatGPT, Perplexity, and Claude cite your site when users ask about your niche
+- **AEO Monitor** — check if ChatGPT, Perplexity, Claude, and Grok cite your site when users ask about your niche
 - **GEO Monitor** — track Google AI Overview: who gets cited for your target keywords (and whether it's you)
 - **Google Search Console** — rankings, clicks, impressions, CTR, indexing status, sitemap health
 - **Keyword Research** — suggestions, volumes, competitor overlap, keyword gaps (DataForSEO)
@@ -59,7 +60,7 @@ The bottom 5 rows are what no existing tool does. That's why searchstack exists.
 - **Markdown Reports** — `searchstack report` generates a full 14-section .md file with executive summary and auto-recommendations. Run it monthly, diff the results, track progress over time.
 - **Cron-ready** — pure CLI, no GUI, no browser. Deploy on any server, schedule via cron (`0 8 * * 1 searchstack report`), pipe output to Slack/email. Built for automation.
 
-**19 commands. 8 API integrations. One config file. Runs anywhere Python runs.**
+**19 commands. 9 API integrations. One config file. Runs anywhere Python runs.**
 
 ```
 $ searchstack ai
@@ -223,7 +224,7 @@ searchstack report                   # full Markdown report (14 sections)
 
 ## Services
 
-8 integrations. None required — each command gracefully skips unavailable services.
+9 integrations. None required — each command gracefully skips unavailable services.
 
 | # | Service | Cost | What it unlocks |
 |---|---------|------|----------------|
@@ -232,9 +233,10 @@ searchstack report                   # full Markdown report (14 sections)
 | 3 | **[OpenAI](https://platform.openai.com)** | ~$0.001/query | ChatGPT citation check |
 | 4 | **[Perplexity](https://docs.perplexity.ai)** | ~$0.005/query | Perplexity citation check (best — returns source URLs) |
 | 5 | **[Anthropic](https://console.anthropic.com)** | ~$0.001/query | Claude citation check |
-| 6 | **[Plausible](https://plausible.io)** | $9/mo | Traffic analytics, AI referral tracking |
-| 7 | **[Bing Webmaster](https://www.bing.com/webmasters)** | Free | Bing stats, URL submission |
-| 8 | **[IndexNow](https://www.indexnow.org)** | Free | Instant Bing/Yandex notification |
+| 6 | **[xAI](https://console.x.ai)** | ~$0.002/query | Grok citation check |
+| 7 | **[Plausible](https://plausible.io)** | $9/mo | Traffic analytics, AI referral tracking |
+| 8 | **[Bing Webmaster](https://www.bing.com/webmasters)** | Free | Bing stats, URL submission |
+| 9 | **[IndexNow](https://www.indexnow.org)** | Free | Instant Bing/Yandex notification |
 
 **Why Bing matters:** ChatGPT Search, Perplexity, and Microsoft Copilot all use Bing as their search backend. If you're not in Bing, you're invisible to 3 major AI search products.
 

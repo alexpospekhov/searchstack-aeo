@@ -1,11 +1,11 @@
-"""AEO citation check across ChatGPT, Perplexity, and Claude."""
+"""AEO citation check across ChatGPT, Perplexity, Claude, and Grok."""
 
 from __future__ import annotations
 
 from searchstack import snapshots
 from searchstack.config import Config
 
-PROVIDERS = ("chatgpt", "perplexity", "claude")
+PROVIDERS = ("chatgpt", "perplexity", "claude", "grok")
 
 
 def _check_provider(
@@ -34,6 +34,12 @@ def _check_provider(
             return {"provider": provider, "results": [], "cited": 0, "total": 0}
         from searchstack.providers import anthropic_client
         check_fn = anthropic_client.check_citation
+    elif provider == "grok":
+        if not config.grok.api_key:
+            print(f"  Skipping Grok -- XAI_API_KEY not configured")
+            return {"provider": provider, "results": [], "cited": 0, "total": 0}
+        from searchstack.providers import grok
+        check_fn = grok.check_citation
     else:
         print(f"  Unknown provider: {provider}")
         return {"provider": provider, "results": [], "cited": 0, "total": 0}
@@ -106,6 +112,7 @@ def run(config: Config, *args: str) -> None:
             "chatgpt": "ChatGPT (gpt-4o-mini)",
             "perplexity": "Perplexity (sonar)",
             "claude": "Claude (haiku)",
+            "grok": "Grok (grok-3-mini)",
         }.get(provider, provider)
 
         print(f"  {label}:")

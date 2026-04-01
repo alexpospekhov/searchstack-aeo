@@ -68,6 +68,7 @@ class Config:
     openai: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     perplexity: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     anthropic: ApiKeyConfig = field(default_factory=ApiKeyConfig)
+    grok: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     plausible: PlausibleConfig = field(default_factory=PlausibleConfig)
     bing: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     indexnow: IndexnowConfig = field(default_factory=IndexnowConfig)
@@ -126,6 +127,7 @@ def _build_config(raw: dict[str, Any]) -> Config:
         openai=ApiKeyConfig(api_key=_get_nested(raw, "openai", "api_key")),
         perplexity=ApiKeyConfig(api_key=_get_nested(raw, "perplexity", "api_key")),
         anthropic=ApiKeyConfig(api_key=_get_nested(raw, "anthropic", "api_key")),
+        grok=ApiKeyConfig(api_key=_get_nested(raw, "grok", "api_key")),
         plausible=PlausibleConfig(
             api_key=plausible_raw.get("api_key", ""),
             site_id=plausible_raw.get("site_id", ""),
@@ -144,6 +146,7 @@ _ENV_MAP: dict[str, tuple[str, ...]] = {
     "OPENAI_API_KEY": ("openai", "api_key"),
     "PERPLEXITY_API_KEY": ("perplexity", "api_key"),
     "ANTHROPIC_API_KEY": ("anthropic", "api_key"),
+    "XAI_API_KEY": ("grok", "api_key"),
     "PLAUSIBLE_API_KEY": ("plausible", "api_key"),
     "BING_WEBMASTER_API_KEY": ("bing", "api_key"),
 }
