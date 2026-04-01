@@ -1,6 +1,6 @@
-# searchstack
+# Searchstack — AEO/GEO/SEO for AI-native founders
 
-> Open-source SEO / AEO / GEO tech stack for AI founders.
+> Open-source AEO / GEO / SEO tech stack for AI-native founders.
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -271,4 +271,4 @@ MIT
 
 ---
 
-Built by [Hyperfocus](https://hyperfocus.tech)
+Built by [Alex Pospekhov](https://github.com/alexpospekhov)

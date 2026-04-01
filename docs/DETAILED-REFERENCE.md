@@ -598,4 +598,4 @@ MIT. See [LICENSE](LICENSE).
 
 ---
 
-Built by [Hyperfocus](https://hyperfocus.tech) — AI operations platform for e-commerce agencies.
+Built by [Alex Pospekhov](https://github.com/alexpospekhov)
