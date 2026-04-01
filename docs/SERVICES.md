@@ -15,9 +15,11 @@ Step-by-step instructions for connecting every external service that searchstack
 | 3 | [OpenAI](#3-openai-chatgpt) | For AEO | ~$0.001/query | `[openai]` | `OPENAI_API_KEY` | `ai`, `ai chatgpt` |
 | 4 | [Perplexity](#4-perplexity) | For AEO | ~$0.005/query | `[perplexity]` | `PERPLEXITY_API_KEY` | `ai`, `ai perplexity` |
 | 5 | [Anthropic](#5-anthropic-claude) | For AEO | ~$0.001/query | `[anthropic]` | `ANTHROPIC_API_KEY` | `ai`, `ai claude` |
-| 6 | [Plausible](#6-plausible-analytics) | Optional | $9/mo or self-hosted | `[plausible]` | `PLAUSIBLE_API_KEY` | `traffic` |
-| 7 | [Bing Webmaster](#7-bing-webmaster-tools) | Recommended | Free | `[bing]` | `BING_WEBMASTER_API_KEY` | `bing` |
-| 8 | [IndexNow](#8-indexnow) | Recommended | Free | `[indexnow]` | — | `indexnow` |
+| 6 | [Grok (xAI)](#6-grok-xai) | For AEO | ~$0.002/query | `[grok]` | `XAI_API_KEY` | `ai`, `ai grok` |
+| 7 | [Plausible](#7-plausible-analytics) | Optional | $9/mo or self-hosted | `[plausible]` | `PLAUSIBLE_API_KEY` | `traffic` |
+| 8 | [Bing Webmaster](#8-bing-webmaster-tools) | Recommended | Free | `[bing]` | `BING_WEBMASTER_API_KEY` | `bing` |
+| 9 | [IndexNow](#9-indexnow) | Recommended | Free | `[indexnow]` | — | `indexnow` |
+| 10 | [Google Ads Keyword Planner](#10-google-ads-keyword-planner-optional) | Optional | Free (needs Ads account) | `[google_ads]` | `GOOGLE_ADS_DEVELOPER_TOKEN` | `audit` (volume data) |
 
 Every key goes into **one of two places:**
 
@@ -295,7 +297,43 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 
 ---
 
-## 6. Plausible Analytics
+## 6. Grok (xAI)
+
+**What it gives you:** Ask Grok your target questions and check if the response mentions your domain. Grok uses real-time web search, making it a valuable AEO signal — if Grok cites you, your content is findable by AI with live web access.
+
+**Cost:** ~$0.002 per query (grok-3-mini). Checking 8 queries costs ~$0.016.
+
+### Step 1: Get API key
+
+1. Go to **[console.x.ai](https://console.x.ai)** and sign in (or create account)
+2. Navigate to **API Keys**
+3. Click **"Create API Key"**
+4. Copy the key (starts with `xai-`)
+
+### Step 2: Configure searchstack
+
+```toml
+# .searchstack.toml
+
+[grok]
+api_key = "xai-..."
+```
+
+Or:
+
+```bash
+export XAI_API_KEY="xai-..."
+```
+
+### What searchstack does with it
+
+- Sends each query from `[ai_queries]` to Grok via the xAI API (OpenAI-compatible format)
+- Checks if the response text contains your domain name
+- Grok has real-time web search, so it tests live visibility — not just training data
+
+---
+
+## 7. Plausible Analytics
 
 **What it gives you:** Privacy-first web analytics. The killer feature for searchstack: filter traffic by source to see exactly how many visitors come from `chatgpt.com`, `perplexity.ai`, and `claude.ai`.
 
@@ -339,7 +377,7 @@ If you self-host Plausible, change the API base URL (coming in a future searchst
 
 ---
 
-## 7. Bing Webmaster Tools
+## 8. Bing Webmaster Tools
 
 **What it gives you:** Bing-specific query stats, URL submission with daily quotas, sitemap management. **Critical for AI visibility** because ChatGPT Search, Perplexity, and Copilot all use Bing as their search backend.
 
@@ -398,7 +436,7 @@ If you're not in Bing, you're invisible to 3 major AI search products.
 
 ---
 
-## 8. IndexNow
+## 9. IndexNow
 
 **What it gives you:** Instant notification to Bing and Yandex when your pages change. Instead of waiting for crawlers to discover your updates (hours to days), IndexNow tells them immediately.
 
@@ -437,6 +475,60 @@ When you run `searchstack indexnow`:
 Both Bing and Yandex process the notification within minutes.
 
 > **Tip:** Run `searchstack indexnow` every time you publish or update content. It's free and speeds up AI search indexing significantly.
+
+---
+
+## 10. Google Ads Keyword Planner (Optional)
+
+**What it gives you:** Keyword volumes with exact monthly search data, competition level (LOW / MEDIUM / HIGH), and CPC estimates. When available, searchstack uses Keyword Planner data for volume enrichment in the `audit` command, falling back to DataForSEO if not configured.
+
+**Cost:** Free with a Google Ads account, but requires developer token approval from Google.
+
+**Requires:** `google-ads` Python package (not included in default dependencies):
+
+```bash
+pip install google-ads
+```
+
+### Step 1: Create a Google Ads developer token
+
+1. Sign in to **[ads.google.com](https://ads.google.com)** (create an account if you don't have one — no active campaigns required)
+2. Go to **Tools & Settings → Setup → API Center**
+3. Apply for a **developer token** (starts in "Test" mode, which is enough for keyword lookups)
+4. Note your **Customer ID** (the 10-digit number at the top, format: `123-456-7890` — remove dashes for config)
+
+### Step 2: Create OAuth credentials
+
+1. Go to **[console.cloud.google.com](https://console.cloud.google.com)**
+2. Enable the **Google Ads API**
+3. Create an **OAuth 2.0 Client ID** (Desktop app) — same process as for GSC
+4. Generate a **refresh token** using the OAuth playground or the `google-ads` library's built-in authenticator
+
+### Step 3: Configure searchstack
+
+```toml
+# .searchstack.toml
+
+[google_ads]
+customer_id = "1234567890"           # no dashes
+developer_token = "your-dev-token"
+client_id = "your-oauth-client-id"
+client_secret = "your-oauth-client-secret"
+refresh_token = "your-refresh-token"
+```
+
+Or via environment variables:
+
+```bash
+export GOOGLE_ADS_CUSTOMER_ID="1234567890"
+export GOOGLE_ADS_DEVELOPER_TOKEN="your-dev-token"
+```
+
+### What searchstack does with it
+
+- The `audit` command uses Keyword Planner for exact monthly volume data when available
+- Falls back to DataForSEO volume estimates if Google Ads is not configured
+- Provides competition level and CPC estimates for prioritizing keywords
 
 ---
 
@@ -479,18 +571,30 @@ api_key = ""                              # pplx-...
 [anthropic]
 api_key = ""                              # sk-ant-...
 
-# ── 6. Plausible Analytics ($9/mo or self-hosted) ─────────────
+# ── 6. Grok/xAI — AEO check (~$0.002/query) ──────────────────
+[grok]
+api_key = ""                              # xai-...
+
+# ── 7. Plausible Analytics ($9/mo or self-hosted) ─────────────
 [plausible]
 api_key = ""
 site_id = "example.com"
 
-# ── 7. Bing Webmaster Tools (FREE) ───────────────────────────
+# ── 8. Bing Webmaster Tools (FREE) ───────────────────────────
 [bing]
 api_key = ""
 
-# ── 8. IndexNow (FREE) ───────────────────────────────────────
+# ── 9. IndexNow (FREE) ───────────────────────────────────────
 [indexnow]
 key = ""                                  # must match file at domain/{key}.txt
+
+# ── 10. Google Ads Keyword Planner (Optional) ─────────────────
+[google_ads]
+customer_id = ""                          # no dashes
+developer_token = ""
+client_id = ""
+client_secret = ""
+refresh_token = ""
 
 # ── AEO: Questions to ask AI chatbots ────────────────────────
 [ai_queries]
@@ -545,10 +649,15 @@ export DATAFORSEO_PASSWORD="your-api-password"
 export OPENAI_API_KEY="sk-..."
 export PERPLEXITY_API_KEY="pplx-..."
 export ANTHROPIC_API_KEY="sk-ant-..."
+export XAI_API_KEY="xai-..."
 
 # Analytics & webmaster
 export PLAUSIBLE_API_KEY="your-key"
 export BING_WEBMASTER_API_KEY="your-key"
+
+# Google Ads Keyword Planner (optional)
+export GOOGLE_ADS_DEVELOPER_TOKEN="..."
+export GOOGLE_ADS_CUSTOMER_ID="..."
 ```
 
 > **Priority:** Environment variable → config file value. If both are set, the env var wins.
@@ -570,9 +679,9 @@ searchstack gsc
 searchstack serp "your main keyword"
 # Expected: live SERP top-10 results
 
-# Test AEO (all three)
+# Test AEO (all four)
 searchstack ai
-# Expected: citation check results for ChatGPT, Perplexity, Claude
+# Expected: citation check results for ChatGPT, Perplexity, Claude, Grok
 
 # Test GEO
 searchstack geo "your main keyword"
@@ -586,9 +695,21 @@ searchstack traffic
 searchstack bing
 # Expected: daily/monthly quota, query stats
 
+# Test Grok
+searchstack ai grok
+# Expected: citation check for Grok
+
 # Test IndexNow
 searchstack indexnow
 # Expected: submission status for Bing + Yandex
+
+# Test llms.txt
+searchstack llms check
+# Expected: list of AI-ready files on your site
+
+# Test monitor
+searchstack monitor
+# Expected: site health dashboard
 
 # Full report (tests everything at once)
 searchstack report

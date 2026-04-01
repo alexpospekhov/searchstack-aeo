@@ -24,9 +24,9 @@ Search is no longer one thing. There are now three distinct channels where users
     │                 │                  │
     │ Traditional     │ Google's own     │ ChatGPT, Perplexity,
     │ organic         │ AI-generated     │ Claude, Gemini,
-    │ rankings        │ answer box       │ Copilot — each
-    │                 │ with citations   │ with its own model
-    │                 │                  │ and retrieval
+    │ rankings        │ answer box       │ Copilot, Grok —
+    │                 │ with citations   │ each with its own
+    │                 │                  │ model and retrieval
     └─────────────────┴──────────────────┘
 ```
 
@@ -130,13 +130,26 @@ This is the map of which AI models power which user-facing search products, and 
 | **Search backend** | **Google** |
 | **API access** | Vertex AI API (no search grounding in free tier). Monitor indirectly via Google Search Console. |
 
+### Grok (xAI)
+
+| Component | Details |
+|-----------|---------|
+| **Model** | Grok-3, Grok-3-mini (for searchstack we use grok-3-mini) |
+| **Where it appears** | grok.com, X.com integration, xAI apps |
+| **Retrieval method** | **Web search (real-time).** Grok always searches the web before answering. |
+| **Citations** | Yes — shows source links |
+| **How to get cited** | Rank in web search results. Grok uses its own web search. |
+| **Search backend** | **Own web search** (not Bing, not Google) |
+| **Market share** | Growing, integrated into X (Twitter) with 500M+ users |
+| **API access** | xAI API (https://api.x.ai). Compatible with OpenAI format. |
+
 ---
 
 ## The Critical Role of Bing
 
 Here is the fact most SEO practitioners miss:
 
-> **Three out of five major AI search products use Bing as their search backend.**
+> **Three out of six major AI search products use Bing as their search backend. One (Grok) uses its own.**
 
 ```
                     ┌──────────────┐
@@ -164,11 +177,24 @@ Here is the fact most SEO practitioners miss:
         │  Google  │ │  Google  │   │   Gemini   │
         │  SERP    │ │AI Overview│  │(standalone)│
         └──────────┘ └──────────┘   └────────────┘
+
+              ┌──────────────────┐
+              │    xAI / GROK    │
+              │  Own Search Index│
+              └────────┬─────────┘
+                       │
+                       ▼
+                 ┌──────────┐
+                 │   Grok   │
+                 │ (grok.com│
+                 │  + X.com)│
+                 └──────────┘
 ```
 
 **This means:**
-- If you only optimize for Google, you're invisible to ChatGPT, Perplexity, and Copilot
+- If you only optimize for Google, you're invisible to ChatGPT, Perplexity, Copilot, and Grok
 - Bing Webmaster Tools is not optional — it's how you monitor visibility for 3 AI search products
+- Grok uses its own web search — you need to rank in general web results, not just Google or Bing
 - IndexNow (instant Bing/Yandex notification) directly impacts how fast your content appears in AI search results
 - Bing SEO signals (submit sitemap, submit URLs, verify site) are as important as Google signals for AI visibility
 
@@ -209,7 +235,7 @@ The model mentions your product because it appeared enough times in the training
 
 **How to improve:** Create authoritative content that gets linked from many sources. Get mentioned in listicles, comparisons, reviews. Build genuine brand awareness.
 
-### 2. Retrieved Citations (Perplexity, ChatGPT Search, Copilot, Gemini, Google AI Overview)
+### 2. Retrieved Citations (Perplexity, ChatGPT Search, Copilot, Gemini, Grok, Google AI Overview)
 
 The model searches the web in real time, retrieves relevant pages, then generates an answer citing those pages.
 
@@ -263,6 +289,30 @@ This format works because:
 
 ---
 
+## llms.txt — Telling AI Models About Your Site
+
+`llms.txt` is a proposed standard file — like `robots.txt`, but for AI models. Instead of telling crawlers what NOT to index, it tells AI models what your site IS about and how to understand it.
+
+### The two files
+
+- **`llms.txt`** — short version: site name, one-line description, and a list of your important pages with brief labels. Think of it as a table of contents for AI.
+- **`llms-full.txt`** — detailed version: full page summaries, key facts, product descriptions. Everything an AI model needs to understand your site without crawling every page.
+
+### Why it matters
+
+AI models that search the web (Grok, Perplexity, ChatGPT Search) look for easy-to-parse information. `llms.txt` gives them a structured summary of your entire site in one file. This increases the chance they cite your pages accurately — with correct names, descriptions, and URLs.
+
+### How searchstack helps
+
+```bash
+searchstack llms generate   # creates llms.txt and llms-full.txt from your sitemap
+searchstack llms validate   # checks generated files against the llms.txt spec
+```
+
+The `generate` command crawls your sitemap, extracts titles, descriptions, and key content from each page, and produces both files. The `validate` command checks that the files conform to the [llms.txt specification](https://llmstxt.org/).
+
+---
+
 ## The Complete Monitoring Stack
 
 Here is every service and why it exists in the searchstack:
@@ -287,8 +337,10 @@ Here is every service and why it exists in the searchstack:
 │  │   (gpt-4o-mini)                  (training data awareness)        │
 │  ├── Perplexity API ─────────────── Perplexity citation check        │
 │  │   (sonar)                        (real-time web + citations[])    │
-│  └── Anthropic API ──────────────── Claude citation check            │
-│      (claude-haiku-4-5)             (training data awareness)        │
+│  ├── Anthropic API ──────────────── Claude citation check            │
+│  │   (claude-haiku-4-5)             (training data awareness)        │
+│  └── xAI API ────────────────────── Grok citation check             │
+│      (grok-3-mini)                  (real-time web search)           │
 │                                                                      │
 │  BING LAYER (Powers ChatGPT Search + Perplexity + Copilot)          │
 │  ├── Bing Webmaster API ─────────── query stats, URL submission      │
@@ -314,13 +366,14 @@ Here is every service and why it exists in the searchstack:
 ### Service dependency map
 
 ```
-Command          Google  DataFor  OpenAI  Perplex  Anthropic  Plausible  Bing  IndexNow
-                  GSC     SEO
-─────────────────────────────────────────────────────────────────────────────────────────
-ai                                  ●        ●        ●
+Command          Google  DataFor  OpenAI  Perplex  Anthropic  xAI    Plausible  Bing  IndexNow
+                  GSC     SEO                                  Grok
+───────────────────────────────────────────────────────────────────────────────────────────────
+ai                                  ●        ●        ●        ●
 ai chatgpt                          ●
 ai perplexity                                ●
 ai claude                                             ●
+ai grok                                                        ●
 geo                        ●
 gsc               ●
 keywords                   ●
@@ -330,15 +383,18 @@ serp                       ●
 track                      ●
 bulk                       ●
 backlinks                  ●
-traffic                                                          ●
-bing                                                                      ●
-indexnow                                                                          ●
+traffic                                                                  ●
+bing                                                                            ●
+indexnow                                                                                ●
 pages             ●
 meta              (sitemap fetch only)
 schema            (sitemap fetch only)
 links             (sitemap fetch only)
 onpage            (single URL fetch only)
-report            ●        ●        ●        ●        ●         ●        ●
+monitor           ●        ●
+audit             ●        ●
+llms              (no API needed — generates files from sitemap)
+report            ●        ●        ●        ●        ●        ●       ●        ●
 ```
 
 ● = required for that command. Commands without marks use only sitemap/URL fetching (no API key needed).
@@ -379,13 +435,28 @@ searchstack gsc resubmit                      # resubmit sitemap to Google
 searchstack gsc inspect https://site.com/new  # verify Google knows about it
 ```
 
+### After updating llms.txt
+
+```bash
+searchstack llms validate  # check files against the llms.txt spec
+searchstack llms generate  # regenerate if you added/removed pages
+```
+
 ### After a Google algorithm update
 
 ```bash
 searchstack track          # did positions change?
 searchstack geo            # did AI Overview citations change?
+searchstack monitor        # quick site health dashboard
 searchstack gaps           # any new opportunities?
 searchstack report         # full snapshot for comparison
+```
+
+### Periodic site health
+
+```bash
+searchstack monitor        # quick dashboard: GSC stats, indexing, top queries
+searchstack audit          # full SEO analysis with keyword volumes and gaps
 ```
 
 ---
@@ -395,7 +466,7 @@ searchstack report         # full snapshot for comparison
 | Term | Definition |
 |------|-----------|
 | **SEO** | Search Engine Optimization — optimizing for traditional Google/Bing organic results |
-| **AEO** | Answer Engine Optimization — optimizing for visibility in AI chatbots (ChatGPT, Perplexity, Claude) that answer user questions directly |
+| **AEO** | Answer Engine Optimization — optimizing for visibility in AI chatbots (ChatGPT, Perplexity, Claude, Grok) that answer user questions directly |
 | **GEO** | Generative Engine Optimization — optimizing for Google's AI Overview box that appears above organic results |
 | **AI Overview** | Google's AI-generated summary box at the top of search results (powered by Gemini) |
 | **SERP** | Search Engine Results Page — what you see when you Google something |
@@ -413,7 +484,10 @@ searchstack report         # full snapshot for comparison
 | **Orphan Page** | A page in your sitemap that no other page on your site links to — invisible to crawlers that follow links |
 | **JSON-LD** | JavaScript Object Notation for Linked Data — structured data format used by Google to understand page content (Schema.org) |
 | **Domain Rank** | DataForSEO's metric (0-1000) measuring a domain's authority based on backlink quality |
-| **llms.txt** | Proposed standard file (like robots.txt) that tells AI models what your site is about and how to cite it |
+| **Grok** | xAI's AI model, integrated into X (Twitter). Uses its own web search (not Bing, not Google) to retrieve and cite sources |
+| **llms.txt** | Proposed standard file (like robots.txt) that tells AI models what your site is about — short version (llms.txt) for page links, detailed version (llms-full.txt) for full summaries |
+| **Monitor** | Site health dashboard command — quick overview of GSC stats, indexing status, and top queries |
+| **Audit** | Full SEO analysis command — keyword volumes, ranking gaps, competitor comparison, and technical health check |
 
 ---
 
@@ -425,4 +499,5 @@ searchstack report         # full snapshot for comparison
 - [DataForSEO API documentation](https://docs.dataforseo.com/)
 - [llms.txt specification](https://llmstxt.org/)
 - [Google Search Console API reference](https://developers.google.com/webmaster-tools/v1/api_reference_index)
+- [xAI Grok API documentation](https://docs.x.ai/)
 - [Bing Webmaster API reference](https://learn.microsoft.com/en-us/dotnet/api/microsoft.bing.webmaster.api)

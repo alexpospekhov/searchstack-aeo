@@ -2,7 +2,7 @@
 
 **Open-source SEO / AEO / GEO tech stack for AI founders.**
 
-Monitor your visibility across Google, AI Overviews, ChatGPT, Perplexity & Claude — from one CLI.
+Monitor your visibility across Google, AI Overviews, ChatGPT, Perplexity, Claude & Grok — from one CLI.
 
 ```bash
 pip install searchstack
@@ -11,7 +11,7 @@ searchstack report    # full Markdown report with 14 sections
 
 **New to AEO/GEO?** Read [The AEO/GEO Stack Explained](docs/AEO-GEO-EXPLAINED.md) — how AI search works, which models power which search engines, and why Bing matters more than you think.
 
-**Ready to set up?** Follow the [Services Setup Guide](docs/SERVICES.md) — step-by-step instructions for connecting all 8 external services.
+**Ready to set up?** Follow the [Services Setup Guide](docs/SERVICES.md) — step-by-step instructions for connecting all 9 external services + optional Google Ads.
 
 ---
 
@@ -20,7 +20,7 @@ searchstack report    # full Markdown report with 14 sections
 SEO changed. Ranking on Google page 1 is no longer enough.
 
 - **Google AI Overviews** answer queries directly — your link may never get clicked
-- **ChatGPT, Perplexity, Claude** are becoming search engines — do they mention you?
+- **ChatGPT, Perplexity, Claude, Grok** are becoming search engines — do they mention you?
 - Traditional SEO tools (Ahrefs, Semrush) cost $100-400/mo and don't track AI visibility at all
 
 searchstack is a single CLI that covers all three layers:
@@ -28,7 +28,7 @@ searchstack is a single CLI that covers all three layers:
 | Layer | What it means | What searchstack does |
 |-------|--------------|----------------------|
 | **SEO** | Classic Google rankings | GSC positions, keyword tracking, competitor analysis, technical audit |
-| **AEO** | Answer Engine Optimization | Checks if ChatGPT, Perplexity, and Claude cite your site |
+| **AEO** | Answer Engine Optimization | Checks if ChatGPT, Perplexity, Claude, and Grok cite your site |
 | **GEO** | Generative Engine Optimization | Monitors Google AI Overview — who gets cited instead of you |
 
 One command. One config file. All three covered.
@@ -38,7 +38,7 @@ One command. One config file. All three covered.
 ## Features
 
 ### AEO — AI Citation Monitoring
-- Query ChatGPT (GPT-4o-mini), Perplexity (Sonar), and Claude (Haiku) with your target questions
+- Query ChatGPT (GPT-4o-mini), Perplexity (Sonar), Claude (Haiku), and Grok (grok-3-mini) with your target questions
 - Detect whether each AI mentions or links to your domain
 - Track citation rates over time with snapshots
 - Configurable query list per domain
@@ -88,10 +88,11 @@ searchstack                          # full report (everything)
 searchstack report                   # generate Markdown report file
 
 # AEO / GEO
-searchstack ai                       # AI citation check (ChatGPT + Perplexity + Claude)
+searchstack ai                       # AI citation check (ChatGPT + Perplexity + Claude + Grok)
 searchstack ai chatgpt               # ChatGPT only
 searchstack ai perplexity            # Perplexity only
 searchstack ai claude                # Claude only
+searchstack ai grok                  # Grok only
 searchstack geo                      # Google AI Overview for all target keywords
 searchstack geo "custom query"       # single keyword AI Overview check
 
@@ -132,13 +133,22 @@ searchstack indexnow                 # submit all URLs to IndexNow (Bing/Yandex)
 searchstack bing                     # Bing Webmaster quota + query stats
 searchstack bing submit              # submit URLs to Bing
 searchstack bing sitemap             # submit sitemap to Bing
+
+# Site Health & Audit
+searchstack monitor                  # site health dashboard
+searchstack audit                    # full SEO audit with keyword volumes
+
+# LLMs.txt
+searchstack llms generate            # generate llms.txt + llms-full.txt
+searchstack llms validate            # validate existing files
+searchstack llms check               # check AI-ready files
 ```
 
 ---
 
 ## External Services
 
-searchstack integrates with 8 external services. None are strictly required — each command gracefully skips unavailable providers.
+searchstack integrates with 9 external services + optional Google Ads. None are strictly required — each command gracefully skips unavailable providers.
 
 ### Required for core functionality
 
@@ -154,14 +164,16 @@ searchstack integrates with 8 external services. None are strictly required — 
 | 3 | **OpenAI API** | ChatGPT citation check | ~$0.001/query (GPT-4o-mini) | [platform.openai.com](https://platform.openai.com) |
 | 4 | **Perplexity API** | Perplexity citation check with source URLs | ~$0.005/query (Sonar) | [docs.perplexity.ai](https://docs.perplexity.ai) |
 | 5 | **Anthropic API** | Claude citation check | ~$0.001/query (Haiku) | [console.anthropic.com](https://console.anthropic.com) |
+| 6 | **xAI API** | Grok citation check | ~$0.002/query (grok-3-mini) | [console.x.ai](https://console.x.ai) |
 
 ### Optional (recommended)
 
 | # | Service | What it provides | Free tier | Signup |
 |---|---------|-----------------|-----------|--------|
-| 6 | **Plausible Analytics** | Privacy-first traffic analytics, AI referral tracking | Paid ($9/mo) or self-hosted (free) | [plausible.io](https://plausible.io) |
-| 7 | **Bing Webmaster Tools** | Bing rankings, URL submission, query stats | Free (unlimited) | [bing.com/webmasters](https://www.bing.com/webmasters) |
-| 8 | **IndexNow** | Instant URL submission to Bing + Yandex | Free (unlimited) | [indexnow.org](https://www.indexnow.org) |
+| 7 | **Plausible Analytics** | Privacy-first traffic analytics, AI referral tracking | Paid ($9/mo) or self-hosted (free) | [plausible.io](https://plausible.io) |
+| 8 | **Bing Webmaster Tools** | Bing rankings, URL submission, query stats | Free (unlimited) | [bing.com/webmasters](https://www.bing.com/webmasters) |
+| 9 | **IndexNow** | Instant URL submission to Bing + Yandex | Free (unlimited) | [indexnow.org](https://www.indexnow.org) |
+| 10 | **Google Ads API** | Keyword Planner search volumes and competition (optional) | Free with Google Ads account | [ads.google.com](https://ads.google.com) |
 
 ### Cost estimate
 
@@ -252,8 +264,18 @@ api_key = ""
 # Or set env var: ANTHROPIC_API_KEY
 api_key = ""
 
+[grok]
+# Or set env var: XAI_API_KEY
+api_key = ""
+
+# ── Google Ads Keyword Planner (optional) ─────────────
+[google_ads]
+# Or set env vars: GOOGLE_ADS_DEVELOPER_TOKEN, GOOGLE_ADS_CUSTOMER_ID
+developer_token = ""
+customer_id = ""
+
 # ── Target Queries for AI Citation Check ───────────────
-# These are the questions searchstack asks ChatGPT/Perplexity/Claude
+# These are the questions searchstack asks ChatGPT/Perplexity/Claude/Grok
 # to see if they mention your site.
 [ai_queries]
 queries = [
@@ -310,6 +332,9 @@ export BING_WEBMASTER_API_KEY="your-bing-key"
 export OPENAI_API_KEY="sk-..."
 export PERPLEXITY_API_KEY="pplx-..."
 export ANTHROPIC_API_KEY="sk-ant-..."
+export XAI_API_KEY="xai-..."
+export GOOGLE_ADS_DEVELOPER_TOKEN="your-developer-token"
+export GOOGLE_ADS_CUSTOMER_ID="123-456-7890"
 ```
 
 Environment variables take priority over config file values.
@@ -393,6 +418,18 @@ A typical weekly check of 23 GEO keywords + competitor analysis costs ~$0.25.
 
 ---
 
+### xAI API (~$0.002/query)
+
+**What you get:** Ask Grok your target questions and detect whether it mentions your domain in the response.
+
+**Setup:**
+1. Get API key at [console.x.ai](https://console.x.ai)
+2. Uses `grok-3-mini` model
+
+**Commands:** `ai`, `ai grok`
+
+---
+
 ### Plausible Analytics ($9/mo or self-hosted)
 
 **What you get:** Privacy-first web analytics. Critically, Plausible can filter traffic by source — letting you see exactly how many visitors come from `chatgpt.com`, `perplexity.ai`, and `claude.ai`.
@@ -455,7 +492,7 @@ Use `searchstack track` to compare current positions with the previous snapshot 
 2. **Traffic** — Plausible 30-day overview (sources, countries, devices, AI referrals)
 3. **Search Queries** — GSC top queries with clicks, impressions, CTR, position
 4. **GEO Visibility** — Google AI Overview citation status + top cited domains
-5. **AEO Status** — ChatGPT/Perplexity/Claude citation rates
+5. **AEO Status** — ChatGPT/Perplexity/Claude/Grok citation rates
 6. **Google Positions** — ranked keywords with volume
 7. **Competitor Traffic** — bulk traffic estimation comparison
 8. **Indexing Status** — how many sitemap URLs are indexed
@@ -482,7 +519,9 @@ searchstack/
 │   │   ├── bing.py         # Bing Webmaster
 │   │   ├── openai.py       # OpenAI (ChatGPT)
 │   │   ├── perplexity.py   # Perplexity
-│   │   └── anthropic.py    # Anthropic (Claude)
+│   │   ├── anthropic.py    # Anthropic (Claude)
+│   │   ├── grok.py         # Grok (xAI)
+│   │   └── google_ads.py   # Google Ads Keyword Planner
 │   ├── commands/           # one file per CLI command
 │   │   ├── traffic.py
 │   │   ├── ai.py
@@ -501,7 +540,11 @@ searchstack/
 │   │   ├── track.py
 │   │   ├── indexnow.py
 │   │   ├── bing.py
-│   │   └── report.py
+│   │   ├── report.py
+│   │   ├── monitor.py
+│   │   ├── audit.py
+│   │   ├── llms.py
+│   │   └── bulk.py
 │   └── snapshots.py        # save/load/compare JSON snapshots
 ├── pyproject.toml
 ├── README.md
@@ -581,7 +624,7 @@ searchstack gaps
 - [ ] Reddit / HackerNews / Twitter mention tracking
 - [ ] YouTube search visibility
 - [ ] Schema.org auto-fix suggestions
-- [ ] llms.txt / llms-full.txt generation and validation
+- [x] ~~llms.txt / llms-full.txt generation~~ (shipped)
 - [ ] CI/CD integration (GitHub Actions for scheduled monitoring)
 
 ---

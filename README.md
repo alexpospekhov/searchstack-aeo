@@ -163,7 +163,7 @@ searchstack gsc         # your Google rankings
 searchstack report      # full 14-section Markdown report
 ```
 
-See [Services Setup Guide](docs/SERVICES.md) for connecting all 8 services step by step.
+See [Services Setup Guide](docs/SERVICES.md) for connecting all 9 services step by step.
 
 ---
 
@@ -172,7 +172,7 @@ See [Services Setup Guide](docs/SERVICES.md) for connecting all 8 services step 
 ### AEO / GEO — AI Search Visibility
 
 ```bash
-searchstack ai                       # citation check: ChatGPT + Perplexity + Claude
+searchstack ai                       # citation check: ChatGPT + Perplexity + Claude + Grok
 searchstack ai chatgpt               # ChatGPT only
 searchstack ai perplexity            # Perplexity only
 searchstack ai claude                # Claude only
@@ -263,7 +263,7 @@ Monthly cost: **$5-10** for full daily monitoring, **$1-2** for weekly AEO/GEO o
 | 2 | Traffic (30 days) | Plausible |
 | 3 | Search Queries | GSC |
 | 4 | Google AI Overview visibility | DataForSEO |
-| 5 | AI chatbot citations | OpenAI, Perplexity, Anthropic |
+| 5 | AI chatbot citations | OpenAI, Perplexity, Anthropic, xAI |
 | 6 | Google positions | DataForSEO |
 | 7 | Competitor traffic | DataForSEO |
 | 8 | Indexing status | GSC |
@@ -335,8 +335,8 @@ All keys via `.searchstack.toml` or environment variables (env vars take priorit
 ```bash
 export DATAFORSEO_LOGIN="email"          export DATAFORSEO_PASSWORD="pass"
 export OPENAI_API_KEY="sk-..."           export PERPLEXITY_API_KEY="pplx-..."
-export ANTHROPIC_API_KEY="sk-ant-..."    export PLAUSIBLE_API_KEY="key"
-export BING_WEBMASTER_API_KEY="key"
+export ANTHROPIC_API_KEY="sk-ant-..."    export XAI_API_KEY="xai-..."
+export PLAUSIBLE_API_KEY="key"           export BING_WEBMASTER_API_KEY="key"
 ```
 
 Full config template: [docs/SERVICES.md](docs/SERVICES.md#full-config-file-template)
@@ -357,7 +357,9 @@ src/searchstack/
 │   ├── bing.py           # Bing Webmaster
 │   ├── openai.py         # OpenAI (ChatGPT)
 │   ├── perplexity.py     # Perplexity
-│   └── anthropic.py      # Anthropic (Claude)
+│   ├── anthropic.py      # Anthropic (Claude)
+│   ├── grok.py           # Grok (xAI)
+│   └── google_ads.py     # Google Ads Keyword Planner
 └── commands/           # one file per CLI command
     ├── ai.py             # AEO citation check
     ├── geo.py            # GEO AI Overview monitor
@@ -376,7 +378,10 @@ src/searchstack/
     ├── pages.py          # indexing status
     ├── indexnow.py       # IndexNow submission
     ├── bing.py           # Bing Webmaster
-    └── report.py         # Markdown report generator
+    ├── report.py         # Markdown report generator
+    ├── monitor.py        # Site health monitor
+    ├── audit.py          # SEO audit with opportunity scores
+    └── llms.py           # llms.txt generation and validation
 ```
 
 Minimal dependencies: `google-auth`, `google-auth-oauthlib`, `google-api-python-client`, `requests`. No heavy frameworks.
@@ -439,16 +444,17 @@ CMD ["searchstack", "report"]
 
 | Document | What's in it |
 |----------|-------------|
-| **[Services Setup Guide](docs/SERVICES.md)** | Step-by-step setup for all 8 services, full config template, verification checklist |
+| **[Services Setup Guide](docs/SERVICES.md)** | Step-by-step setup for all 9 services, full config template, verification checklist |
 | **[AEO/GEO Explained](docs/AEO-GEO-EXPLAINED.md)** | How AI search works, which models power which search engines, why Bing matters, monitoring strategy |
 | **[Detailed Reference](docs/DETAILED-REFERENCE.md)** | Deep dive into every feature, command, and service |
+| **[llmstxt.org spec](https://llmstxt.org)** | The llms.txt standard — `searchstack llms` implements generation and validation with built-in docs |
 
 ---
 
 ## FAQ
 
 <details>
-<summary><strong>Do I need all 8 services?</strong></summary>
+<summary><strong>Do I need all 9 services?</strong></summary>
 
 No. Each command gracefully skips unavailable services. You can start with just the free tools (`meta`, `schema`, `links`, `onpage`) and add API keys as needed. The most impactful paid service is DataForSEO ($50 one-time) — it unlocks GEO monitoring, keyword research, and competitor analysis.
 
@@ -469,7 +475,7 @@ Compare: Ahrefs starts at $99/mo, Semrush at $130/mo, and neither tracks AI visi
 <details>
 <summary><strong>Does searchstack work without DataForSEO?</strong></summary>
 
-Yes. Without DataForSEO you lose: keyword research, live SERP, GEO monitoring, competitor analysis, backlink checks, and position tracking. You keep: GSC rankings, AEO citation checks (ChatGPT/Perplexity/Claude), Plausible traffic, technical audit, Bing submission, and IndexNow.
+Yes. Without DataForSEO you lose: keyword research, live SERP, GEO monitoring, competitor analysis, backlink checks, and position tracking. You keep: GSC rankings, AEO citation checks (ChatGPT/Perplexity/Claude/Grok), Plausible traffic, technical audit, Bing submission, and IndexNow.
 
 </details>
 
