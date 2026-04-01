@@ -7,6 +7,10 @@
 
 Monitor your visibility across Google, AI Overviews, ChatGPT, Perplexity & Claude — from one CLI.
 
+<p align="center">
+  <img src="demo/searchstack-demo.gif" alt="searchstack CLI demo" width="900">
+</p>
+
 ## Who is this for
 
 - **AI-native founders** — you're building a product and need to be visible in both Google AND AI search, but don't have $400/mo for Semrush
