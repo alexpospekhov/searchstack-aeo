@@ -18,9 +18,10 @@ Monitor your visibility across Google, AI Overviews, ChatGPT, Perplexity & Claud
 - **Technical Audit** — meta tags, JSON-LD validation, internal linking, orphan pages, on-page scoring
 - **Traffic Analytics** — Plausible integration with AI referral breakdown (chatgpt.com, perplexity.ai, claude.ai)
 - **Search Submission** — IndexNow (instant Bing/Yandex), Bing Webmaster, GSC sitemap resubmit
-- **Markdown Reports** — full 14-section report with executive summary and auto-recommendations
+- **Markdown Reports** — `searchstack report` generates a full 14-section .md file with executive summary and auto-recommendations. Run it monthly, diff the results, track progress over time.
+- **Cron-ready** — pure CLI, no GUI, no browser. Deploy on any server, schedule via cron (`0 8 * * 1 searchstack report`), pipe output to Slack/email. Built for automation.
 
-**19 commands. 8 API integrations. One config file.**
+**19 commands. 8 API integrations. One config file. Runs anywhere Python runs.**
 
 ```
 $ searchstack ai
@@ -254,6 +255,58 @@ src/searchstack/
 ```
 
 Minimal dependencies: `google-auth`, `google-auth-oauthlib`, `google-api-python-client`, `requests`. No heavy frameworks.
+
+---
+
+## Server & Cron Deployment
+
+searchstack is a pure CLI tool — no GUI, no browser window, no interactive prompts (after initial OAuth setup). Deploy it on any Linux server and automate with cron.
+
+### Example: weekly monitoring on a VPS
+
+```bash
+# Install
+pip install searchstack
+
+# Copy your .searchstack.toml and token.pickle to the server
+scp .searchstack.toml token.pickle yourserver:~/.config/searchstack/
+
+# Add to crontab (crontab -e)
+# ┌─── Weekly full report (Monday 8am)
+0 8 * * 1  searchstack report >> /var/log/searchstack.log 2>&1
+
+# ┌─── Daily position tracking
+0 6 * * *  searchstack track >> /var/log/searchstack.log 2>&1
+
+# ┌─── Submit new content to search engines (every 6 hours)
+0 */6 * * *  searchstack indexnow >> /var/log/searchstack.log 2>&1
+
+# ┌─── Weekly AEO check (Wednesday)
+0 9 * * 3  searchstack ai >> /var/log/searchstack.log 2>&1
+
+# ┌─── Weekly GEO check (Wednesday)
+0 10 * * 3  searchstack geo >> /var/log/searchstack.log 2>&1
+```
+
+### Pipe to Slack / email
+
+```bash
+# Send report to Slack via webhook
+searchstack report && curl -X POST -d "{\"text\":\"$(cat ~/.searchstack/snapshots/report_$(date +%Y%m%d).md)\"}" YOUR_SLACK_WEBHOOK
+
+# Or email it
+searchstack report && mail -s "SEO Report $(date +%Y-%m-%d)" you@company.com < ~/.searchstack/snapshots/report_$(date +%Y%m%d).md
+```
+
+### Docker (coming soon)
+
+```dockerfile
+FROM python:3.12-slim
+RUN pip install searchstack
+COPY .searchstack.toml /root/.config/searchstack/config.toml
+COPY token.pickle /root/.config/searchstack/
+CMD ["searchstack", "report"]
+```
 
 ---
 
