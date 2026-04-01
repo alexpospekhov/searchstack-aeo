@@ -7,6 +7,40 @@
 
 Monitor your visibility across Google, AI Overviews, ChatGPT, Perplexity & Claude — from one CLI.
 
+## Who is this for
+
+- **AI-native founders** — you're building a product and need to be visible in both Google AND AI search, but don't have $400/mo for Semrush
+- **Indie hackers & solo devs** — you ship content, want to know if it's working, and prefer CLI over dashboards
+- **SEO-aware engineers** — you understand technical SEO but need a tool that also covers the new AEO/GEO landscape
+- **Agency operators** — you manage SEO for multiple clients and need automated reports you can schedule and pipe to Slack
+
+If you've ever wondered *"Does ChatGPT know my product exists?"* — this tool answers that question.
+
+---
+
+## searchstack vs The Rest
+
+| Feature | searchstack | Ahrefs ($99+/mo) | Semrush ($130+/mo) | Free tools |
+|---------|:-----------:|:-----------------:|:-------------------:|:----------:|
+| Google rankings (GSC) | ✅ | ✅ | ✅ | ✅ GSC only |
+| Keyword research | ✅ | ✅ | ✅ | ❌ |
+| Backlink analysis | ✅ | ✅ | ✅ | ❌ |
+| Technical audit | ✅ | ✅ | ✅ | Partial |
+| **ChatGPT citation check** | ✅ | ❌ | ❌ | ❌ |
+| **Perplexity citation check** | ✅ | ❌ | ❌ | ❌ |
+| **Claude citation check** | ✅ | ❌ | ❌ | ❌ |
+| **Google AI Overview monitor** | ✅ | ❌ | ❌ | ❌ |
+| **AI referral tracking** | ✅ | ❌ | ❌ | ❌ |
+| CLI / scriptable | ✅ | ❌ | ❌ | ❌ |
+| Cron / server deploy | ✅ | ❌ | ❌ | ❌ |
+| Markdown reports | ✅ | ❌ PDF only | ❌ PDF only | ❌ |
+| Open source | ✅ | ❌ | ❌ | Varies |
+| Monthly cost | **~$5** | $99-999 | $130-500 | $0 (limited) |
+
+The bottom 5 rows are what no existing tool does. That's why searchstack exists.
+
+---
+
 ### What's inside
 
 - **AEO Monitor** — check if ChatGPT, Perplexity, and Claude cite your site when users ask about your niche
@@ -46,40 +80,6 @@ $ searchstack ai
   Summary: ChatGPT 2/3 | Perplexity 2/3 | Claude 0/3
   Saved: ~/.searchstack/snapshots/ai_citations_20260401_1200.json
 ```
-
----
-
-## Who is this for
-
-- **AI-native founders** — you're building a product and need to be visible in both Google AND AI search, but don't have $400/mo for Semrush
-- **Indie hackers & solo devs** — you ship content, want to know if it's working, and prefer CLI over dashboards
-- **SEO-aware engineers** — you understand technical SEO but need a tool that also covers the new AEO/GEO landscape
-- **Agency operators** — you manage SEO for multiple clients and need automated reports you can schedule and pipe to Slack
-
-If you've ever wondered *"Does ChatGPT know my product exists?"* — this tool answers that question.
-
----
-
-## searchstack vs The Rest
-
-| Feature | searchstack | Ahrefs ($99+/mo) | Semrush ($130+/mo) | Free tools |
-|---------|:-----------:|:-----------------:|:-------------------:|:----------:|
-| Google rankings (GSC) | ✅ | ✅ | ✅ | ✅ GSC only |
-| Keyword research | ✅ | ✅ | ✅ | ❌ |
-| Backlink analysis | ✅ | ✅ | ✅ | ❌ |
-| Technical audit | ✅ | ✅ | ✅ | Partial |
-| **ChatGPT citation check** | ✅ | ❌ | ❌ | ❌ |
-| **Perplexity citation check** | ✅ | ❌ | ❌ | ❌ |
-| **Claude citation check** | ✅ | ❌ | ❌ | ❌ |
-| **Google AI Overview monitor** | ✅ | ❌ | ❌ | ❌ |
-| **AI referral tracking** | ✅ | ❌ | ❌ | ❌ |
-| CLI / scriptable | ✅ | ❌ | ❌ | ❌ |
-| Cron / server deploy | ✅ | ❌ | ❌ | ❌ |
-| Markdown reports | ✅ | ❌ PDF only | ❌ PDF only | ❌ |
-| Open source | ✅ | ❌ | ❌ | Varies |
-| Monthly cost | **~$5** | $99-999 | $130-500 | $0 (limited) |
-
-The bottom 5 rows are what no existing tool does. That's why searchstack exists.
 
 ---
 
