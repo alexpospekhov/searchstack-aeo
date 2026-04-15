@@ -67,6 +67,28 @@ class OllamaConfig:
 
 
 @dataclass
+class OpenrouterConfig:
+    """Unified OpenRouter routing for all AI citation providers.
+
+    When ``api_key`` is set, the openai / anthropic / perplexity / grok
+    providers route their requests through OpenRouter's OpenAI-compatible
+    endpoint using the model IDs below, instead of hitting each vendor's
+    native API. This lets a user run ``searchstack ai`` with a single key and
+    unified billing, which matches how many AI-native founders already manage
+    their API access today.
+
+    Leaving ``api_key`` empty preserves the original behavior — native APIs
+    direct, no change for existing users.
+    """
+    api_key: str = ""
+    base_url: str = "https://openrouter.ai/api/v1"
+    chatgpt_model: str = "openai/gpt-4o-mini"
+    claude_model: str = "anthropic/claude-haiku-4.5"
+    perplexity_model: str = "perplexity/sonar"
+    grok_model: str = "x-ai/grok-3-mini"
+
+
+@dataclass
 class GoogleAdsConfig:
     customer_id: str = ""
     developer_token: str = ""
@@ -88,6 +110,7 @@ class Config:
     anthropic: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     grok: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     ollama: OllamaConfig = field(default_factory=OllamaConfig)
+    openrouter: OpenrouterConfig = field(default_factory=OpenrouterConfig)
     plausible: PlausibleConfig = field(default_factory=PlausibleConfig)
     bing: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     indexnow: IndexnowConfig = field(default_factory=IndexnowConfig)
@@ -154,6 +177,14 @@ def _build_config(raw: dict[str, Any]) -> Config:
             model=_get_nested(raw, "ollama", "model"),
             api_key=_get_nested(raw, "ollama", "api_key"),
         ),
+        openrouter=OpenrouterConfig(
+            api_key=_get_nested(raw, "openrouter", "api_key"),
+            base_url=_get_nested(raw, "openrouter", "base_url") or "https://openrouter.ai/api/v1",
+            chatgpt_model=_get_nested(raw, "openrouter", "chatgpt_model") or "openai/gpt-4o-mini",
+            claude_model=_get_nested(raw, "openrouter", "claude_model") or "anthropic/claude-haiku-4.5",
+            perplexity_model=_get_nested(raw, "openrouter", "perplexity_model") or "perplexity/sonar",
+            grok_model=_get_nested(raw, "openrouter", "grok_model") or "x-ai/grok-3-mini",
+        ),
         plausible=PlausibleConfig(
             api_key=plausible_raw.get("api_key", ""),
             site_id=plausible_raw.get("site_id", ""),
@@ -182,6 +213,7 @@ _ENV_MAP: dict[str, tuple[str, ...]] = {
     "PERPLEXITY_API_KEY": ("perplexity", "api_key"),
     "ANTHROPIC_API_KEY": ("anthropic", "api_key"),
     "XAI_API_KEY": ("grok", "api_key"),
+    "OPENROUTER_API_KEY": ("openrouter", "api_key"),
     "PLAUSIBLE_API_KEY": ("plausible", "api_key"),
     "BING_WEBMASTER_API_KEY": ("bing", "api_key"),
     "GOOGLE_ADS_DEVELOPER_TOKEN": ("google_ads", "developer_token"),
