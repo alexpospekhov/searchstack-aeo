@@ -54,7 +54,15 @@ def _check_provider(
 
     for query in queries:
         try:
-            result = check_fn(query, config.domain, config)
+            # Provider check_citation functions are defined as
+            # (config, query_text, domain); passing them as (query, domain,
+            # config) means the first positional argument — a plain string —
+            # gets used as `config`, and the very first attribute access
+            # inside the provider (e.g. `config.openai.api_key`) raises
+            # `AttributeError: 'str' object has no attribute 'openai'`. The
+            # `ai` command was unable to complete even a single provider call
+            # without this fix.
+            result = check_fn(config, query, config.domain)
             is_cited = result.get("cited", False)
             url = result.get("url", "")
 
