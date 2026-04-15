@@ -1,4 +1,9 @@
-"""xAI Grok API provider — AEO citation check."""
+"""xAI Grok API provider — AEO citation check.
+
+When ``config.openrouter.api_key`` is set, routes through OpenRouter's
+OpenAI-compatible endpoint using ``config.openrouter.grok_model`` instead of
+the native xAI API.
+"""
 from __future__ import annotations
 
 import json
@@ -13,12 +18,19 @@ def check_citation(config: Config, query_text: str, domain: str) -> dict:
 
     Returns: {"cited": bool, "text": str, "model": str, "error": str|None}
     """
-    api_key = config.grok.api_key
-    if not api_key:
-        return {"error": "No XAI_API_KEY"}
+    if config.openrouter.api_key:
+        api_url = f"{config.openrouter.base_url.rstrip('/')}/chat/completions"
+        model = config.openrouter.grok_model
+        api_key = config.openrouter.api_key
+    else:
+        api_url = "https://api.x.ai/v1/chat/completions"
+        model = "grok-3-mini"
+        api_key = config.grok.api_key
+        if not api_key:
+            return {"error": "No XAI_API_KEY (and no OPENROUTER_API_KEY set)"}
 
     body = json.dumps({
-        "model": "grok-3-mini",
+        "model": model,
         "messages": [
             {
                 "role": "system",
@@ -34,7 +46,7 @@ def check_citation(config: Config, query_text: str, domain: str) -> dict:
     }).encode()
 
     req = urllib.request.Request(
-        "https://api.x.ai/v1/chat/completions",
+        api_url,
         method="POST",
         headers={
             "Authorization": f"Bearer {api_key}",
@@ -47,7 +59,7 @@ def check_citation(config: Config, query_text: str, domain: str) -> dict:
         resp = json.loads(urllib.request.urlopen(req, timeout=30).read())
         text = resp["choices"][0]["message"]["content"]
         cited = domain.lower() in text.lower()
-        return {"cited": cited, "text": text[:300], "model": "grok-3-mini"}
+        return {"cited": cited, "text": text[:300], "model": model}
     except urllib.error.HTTPError as e:
         return {"error": f"HTTP {e.code}: {e.read().decode()[:100]}"}
     except Exception as e:

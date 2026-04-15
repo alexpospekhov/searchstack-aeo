@@ -16,27 +16,35 @@ def _check_provider(
     """Run citation check for a single provider. Returns results dict."""
     results: list[dict] = []
 
+    # An OpenRouter key unlocks every AI provider at once — the provider
+    # clients route themselves through OpenRouter's OpenAI-compatible
+    # endpoint when it's set, so we treat the OpenRouter key as an acceptable
+    # fallback for each provider-specific key gate below. Without this, every
+    # provider would skip with "no NATIVE_API_KEY" even when OpenRouter is
+    # configured.
+    has_openrouter = bool(config.openrouter.api_key)
+
     if provider == "chatgpt":
-        if not config.openai.api_key:
-            print(f"  Skipping ChatGPT -- OPENAI_API_KEY not configured")
+        if not config.openai.api_key and not has_openrouter:
+            print(f"  Skipping ChatGPT -- OPENAI_API_KEY (or OPENROUTER_API_KEY) not configured")
             return {"provider": provider, "results": [], "cited": 0, "total": 0}
         from searchstack.providers import openai_client
         check_fn = openai_client.check_citation
     elif provider == "perplexity":
-        if not config.perplexity.api_key:
-            print(f"  Skipping Perplexity -- PERPLEXITY_API_KEY not configured")
+        if not config.perplexity.api_key and not has_openrouter:
+            print(f"  Skipping Perplexity -- PERPLEXITY_API_KEY (or OPENROUTER_API_KEY) not configured")
             return {"provider": provider, "results": [], "cited": 0, "total": 0}
         from searchstack.providers import perplexity
         check_fn = perplexity.check_citation
     elif provider == "claude":
-        if not config.anthropic.api_key:
-            print(f"  Skipping Claude -- ANTHROPIC_API_KEY not configured")
+        if not config.anthropic.api_key and not has_openrouter:
+            print(f"  Skipping Claude -- ANTHROPIC_API_KEY (or OPENROUTER_API_KEY) not configured")
             return {"provider": provider, "results": [], "cited": 0, "total": 0}
         from searchstack.providers import anthropic_client
         check_fn = anthropic_client.check_citation
     elif provider == "grok":
-        if not config.grok.api_key:
-            print(f"  Skipping Grok -- XAI_API_KEY not configured")
+        if not config.grok.api_key and not has_openrouter:
+            print(f"  Skipping Grok -- XAI_API_KEY (or OPENROUTER_API_KEY) not configured")
             return {"provider": provider, "results": [], "cited": 0, "total": 0}
         from searchstack.providers import grok
         check_fn = grok.check_citation
