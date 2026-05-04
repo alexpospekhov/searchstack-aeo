@@ -2,6 +2,13 @@
 
 Checks both the citations array and response text for domain presence.
 All HTTP via urllib.request.
+
+When ``config.openrouter.api_key`` is set, the request is routed through
+OpenRouter's OpenAI-compatible endpoint using
+``config.openrouter.perplexity_model`` instead of the native Perplexity API.
+OpenRouter exposes Perplexity Sonar online models which still perform live
+web retrieval, so citations should still be extractable (see the four
+extraction locations below).
 """
 
 from __future__ import annotations
@@ -22,8 +29,17 @@ def check_citation(config: Config, query_text: str, domain: str) -> dict[str, ob
     Returns:
         {"cited": bool, "text": str, "citations": list[str], "model": str, "error": str | None}
     """
+    if config.openrouter.api_key:
+        api_url = f"{config.openrouter.base_url.rstrip('/')}/chat/completions"
+        model = config.openrouter.perplexity_model
+        api_key = config.openrouter.api_key
+    else:
+        api_url = API_URL
+        model = MODEL
+        api_key = config.perplexity.api_key
+
     payload = {
-        "model": MODEL,
+        "model": model,
         "max_tokens": 500,
         "messages": [
             {"role": "user", "content": query_text},
@@ -31,17 +47,46 @@ def check_citation(config: Config, query_text: str, domain: str) -> dict[str, ob
     }
     data = json.dumps(payload).encode()
     headers = {
-        "Authorization": f"Bearer {config.perplexity.api_key}",
+        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
-    req = urllib.request.Request(API_URL, data=data, headers=headers, method="POST")
+    req = urllib.request.Request(api_url, data=data, headers=headers, method="POST")
 
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
             result = json.loads(resp.read())
 
-        text = result["choices"][0]["message"]["content"]
-        citations: list[str] = result.get("citations", [])
+        choice0 = result.get("choices", [{}])[0] if result.get("choices") else {}
+        message = choice0.get("message", {}) if isinstance(choice0, dict) else {}
+        text = message.get("content", "") if isinstance(message, dict) else ""
+
+        # Citations can live in four different places depending on which
+        # Perplexity-compatible backend answered the request:
+        #   1. top-level `citations` (array of URL strings) — native
+        #      Perplexity API on older Sonar models
+        #   2. `choices[0].citations` — older passthrough wrappers
+        #   3. `choices[0].message.citations` — some wrappers
+        #   4. `choices[0].message.annotations[]` with
+        #      `type == "url_citation"` and a nested
+        #      `url_citation: {url, title, ...}` object — the current
+        #      Perplexity annotation format (2026-04+), also used by
+        #      OpenAI-compatible passthroughs such as OpenRouter
+        # The original code only probed (1), so responses from backends
+        # that returned (4) looked like they had zero citations when they
+        # actually had 10+. We probe all four and concatenate.
+        citations: list[str] = list(result.get("citations") or [])
+        if isinstance(choice0, dict):
+            citations.extend(choice0.get("citations") or [])
+        if isinstance(message, dict):
+            citations.extend(message.get("citations") or [])
+            for ann in (message.get("annotations") or []):
+                if isinstance(ann, dict) and ann.get("type") == "url_citation":
+                    url_obj = ann.get("url_citation") or {}
+                    if isinstance(url_obj, dict):
+                        url = url_obj.get("url")
+                        if url:
+                            citations.append(url)
+
         domain_lower = domain.lower()
 
         cited_in_citations = any(domain_lower in c.lower() for c in citations)
@@ -51,7 +96,7 @@ def check_citation(config: Config, query_text: str, domain: str) -> dict[str, ob
             "cited": cited_in_citations or cited_in_text,
             "text": text[:300],
             "citations": citations,
-            "model": MODEL,
+            "model": model,
             "error": None,
         }
     except urllib.error.HTTPError as exc:
@@ -59,7 +104,7 @@ def check_citation(config: Config, query_text: str, domain: str) -> dict[str, ob
             "cited": False,
             "text": "",
             "citations": [],
-            "model": MODEL,
+            "model": model,
             "error": f"HTTP {exc.code}: {exc.reason}",
         }
     except Exception as exc:
@@ -67,6 +112,6 @@ def check_citation(config: Config, query_text: str, domain: str) -> dict[str, ob
             "cited": False,
             "text": "",
             "citations": [],
-            "model": MODEL,
+            "model": model,
             "error": str(exc),
         }

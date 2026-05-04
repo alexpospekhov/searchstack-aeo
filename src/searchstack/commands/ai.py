@@ -16,27 +16,35 @@ def _check_provider(
     """Run citation check for a single provider. Returns results dict."""
     results: list[dict] = []
 
+    # An OpenRouter key unlocks every AI provider at once — the provider
+    # clients route themselves through OpenRouter's OpenAI-compatible
+    # endpoint when it's set, so we treat the OpenRouter key as an acceptable
+    # fallback for each provider-specific key gate below. Without this, every
+    # provider would skip with "no NATIVE_API_KEY" even when OpenRouter is
+    # configured.
+    has_openrouter = bool(config.openrouter.api_key)
+
     if provider == "chatgpt":
-        if not config.openai.api_key:
-            print(f"  Skipping ChatGPT -- OPENAI_API_KEY not configured")
+        if not config.openai.api_key and not has_openrouter:
+            print(f"  Skipping ChatGPT -- OPENAI_API_KEY (or OPENROUTER_API_KEY) not configured")
             return {"provider": provider, "results": [], "cited": 0, "total": 0}
         from searchstack.providers import openai_client
         check_fn = openai_client.check_citation
     elif provider == "perplexity":
-        if not config.perplexity.api_key:
-            print(f"  Skipping Perplexity -- PERPLEXITY_API_KEY not configured")
+        if not config.perplexity.api_key and not has_openrouter:
+            print(f"  Skipping Perplexity -- PERPLEXITY_API_KEY (or OPENROUTER_API_KEY) not configured")
             return {"provider": provider, "results": [], "cited": 0, "total": 0}
         from searchstack.providers import perplexity
         check_fn = perplexity.check_citation
     elif provider == "claude":
-        if not config.anthropic.api_key:
-            print(f"  Skipping Claude -- ANTHROPIC_API_KEY not configured")
+        if not config.anthropic.api_key and not has_openrouter:
+            print(f"  Skipping Claude -- ANTHROPIC_API_KEY (or OPENROUTER_API_KEY) not configured")
             return {"provider": provider, "results": [], "cited": 0, "total": 0}
         from searchstack.providers import anthropic_client
         check_fn = anthropic_client.check_citation
     elif provider == "grok":
-        if not config.grok.api_key:
-            print(f"  Skipping Grok -- XAI_API_KEY not configured")
+        if not config.grok.api_key and not has_openrouter:
+            print(f"  Skipping Grok -- XAI_API_KEY (or OPENROUTER_API_KEY) not configured")
             return {"provider": provider, "results": [], "cited": 0, "total": 0}
         from searchstack.providers import grok
         check_fn = grok.check_citation
@@ -54,23 +62,59 @@ def _check_provider(
 
     for query in queries:
         try:
-            result = check_fn(query, config.domain, config)
+            # Provider check_citation functions are defined as
+            # (config, query_text, domain); passing them as (query, domain,
+            # config) means the first positional argument — a plain string —
+            # gets used as `config`, and the very first attribute access
+            # inside the provider (e.g. `config.openai.api_key`) raises
+            # `AttributeError: 'str' object has no attribute 'openai'`. The
+            # `ai` command was unable to complete even a single provider call
+            # without this fix.
+            result = check_fn(config, query, config.domain)
             is_cited = result.get("cited", False)
             url = result.get("url", "")
+            # Persist the full provider response alongside the existing
+            # fields. Providers return (text, citations, model, error) — the
+            # original snapshot kept only (query, cited, url, raw), which
+            # dropped the model's answer text and any competitor citations
+            # it returned. On a zero-citation baseline this was nearly all of
+            # the run's value: knowing that a domain isn't cited matters much
+            # less than knowing which domains the model DID cite in its
+            # place. Keeping the originals for backward compatibility.
+            results.append({
+                "query": query,
+                "cited": is_cited,
+                "url": url,
+                "text": result.get("text", ""),
+                "citations": result.get("citations", []),
+                "model": result.get("model", ""),
+                "error": result.get("error"),
+                "raw": result.get("raw", ""),
+            })
 
             if is_cited:
                 cited_count += 1
                 suffix = f"  -> {url}" if url else ""
                 print(f'    "{query}"  \u2705 CITED{suffix}')
             else:
-                print(f'    "{query}"  \u274c not cited')
-
-            results.append({
-                "query": query,
-                "cited": is_cited,
-                "url": url,
-                "raw": result.get("raw", ""),
-            })
+                # Surface the top competitor hostnames inline so a 0-citation
+                # run still produces actionable positioning data at a glance.
+                competitor_hosts: list[str] = []
+                for c in result.get("citations") or []:
+                    if isinstance(c, str) and "://" in c:
+                        try:
+                            host = c.split("://", 1)[1].split("/", 1)[0]
+                            if host.startswith("www."):
+                                host = host[4:]
+                            if host and host not in competitor_hosts:
+                                competitor_hosts.append(host)
+                        except Exception:
+                            pass
+                if competitor_hosts:
+                    hint = ", ".join(competitor_hosts[:3])
+                    print(f'    "{query}"  \u274c not cited   [cites: {hint}]')
+                else:
+                    print(f'    "{query}"  \u274c not cited')
         except Exception as e:
             print(f'    "{query}"  \u26a0\ufe0f  error: {e}')
             results.append({
