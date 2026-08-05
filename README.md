@@ -150,6 +150,9 @@ sitemap = "https://yoursite.com/sitemap.xml"
 login = "you@email.com"
 password = "api-password"
 
+[serpbase]
+api_key = "your-key"  # optional: lighter alternative to DataForSEO for SERP checks
+
 [openai]
 api_key = "sk-..."
 
@@ -243,6 +246,7 @@ searchstack report                   # full Markdown report (14 sections)
 |---|---------|------|----------------|
 | 1 | **[Google Search Console](https://search.google.com/search-console)** | Free | Rankings, clicks, indexing status |
 | 2 | **[DataForSEO](https://dataforseo.com)** | $50 prepaid | Keywords, SERP, AI Overview, backlinks |
+| 2a | **[Serpbase](https://serpbase.dev)** | $0.30/1k queries | Lightweight Google SERP (organic results) |
 | 3 | **[OpenAI](https://platform.openai.com)** | ~$0.001/query | ChatGPT citation check |
 | 4 | **[Perplexity](https://docs.perplexity.ai)** | ~$0.005/query | Perplexity citation check (best — returns source URLs) |
 | 5 | **[Anthropic](https://console.anthropic.com)** | ~$0.001/query | Claude citation check |
