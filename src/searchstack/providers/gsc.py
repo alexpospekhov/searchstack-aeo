@@ -27,7 +27,26 @@ def get_gsc_token(config: Config) -> str | None:
     token_path = creds_path.parent / "token.pickle"
 
     if not token_path.exists():
-        return None
+        if not creds_path.exists():
+            return None
+        try:
+            from google_auth_oauthlib.flow import InstalledAppFlow
+
+            scopes = [
+                "https://www.googleapis.com/auth/webmasters.readonly",
+                "https://www.googleapis.com/auth/webmasters",
+                "https://www.googleapis.com/auth/indexing",
+            ]
+            print(f"  No token.pickle found. Starting Google OAuth flow with {creds_path.name}...")
+            flow = InstalledAppFlow.from_client_secrets_file(str(creds_path), scopes)
+            new_creds = flow.run_local_server(port=0)
+            with open(token_path, "wb") as f:
+                pickle.dump(new_creds, f)
+            token_path.chmod(0o600)
+            return new_creds.token
+        except Exception as exc:
+            print(f"  Google OAuth flow failed: {exc}")
+            return None
 
     try:
         with open(token_path, "rb") as f:
@@ -76,7 +95,10 @@ def gsc_request(
 
     try:
         with urllib.request.urlopen(req) as resp:
-            return json.loads(resp.read())  # type: ignore[no-any-return]
+            raw = resp.read()
+            if not raw:
+                return {}
+            return json.loads(raw)  # type: ignore[no-any-return]
     except urllib.error.HTTPError as exc:
         return {"error": f"HTTP {exc.code}: {exc.reason}"}
     except Exception as exc:
@@ -89,3 +111,70 @@ def get_gsc_site_url_encoded(config: Config) -> str:
     Example: sc-domain:example.com -> sc-domain%3Aexample.com
     """
     return quote(config.gsc.site_url, safe="")
+
+
+def query(
+    *,
+    site_url: str,
+    start_date: str,
+    end_date: str,
+    dimensions: list[str],
+    config: Config,
+    row_limit: int = 100,
+    search_type: str = "web",
+) -> dict[str, Any]:
+    """Run Search Analytics query with optional search type (web, discover, googleNews)."""
+    encoded_site = quote(site_url, safe="")
+    body: dict[str, Any] = {
+        "startDate": start_date,
+        "endDate": end_date,
+        "dimensions": dimensions,
+        "rowLimit": row_limit,
+    }
+    if search_type and search_type != "web":
+        body["type"] = search_type
+    data = gsc_request(
+        config,
+        f"webmasters/v3/sites/{encoded_site}/searchAnalytics/query",
+        method="POST",
+        body=body,
+    )
+    return data or {"rows": []}
+
+
+def list_sitemaps(*, site_url: str, config: Config) -> dict[str, Any]:
+    """List submitted sitemaps for the property."""
+    encoded_site = quote(site_url, safe="")
+    data = gsc_request(
+        config,
+        f"webmasters/v3/sites/{encoded_site}/sitemaps",
+        method="GET",
+    )
+    return data or {"sitemap": []}
+
+
+def submit_sitemap(*, site_url: str, sitemap_url: str, config: Config) -> dict[str, Any]:
+    """Submit or resubmit a sitemap."""
+    encoded_site = quote(site_url, safe="")
+    encoded_sitemap = quote(sitemap_url, safe="")
+    data = gsc_request(
+        config,
+        f"webmasters/v3/sites/{encoded_site}/sitemaps/{encoded_sitemap}",
+        method="PUT",
+    )
+    return data or {"status": "submitted"}
+
+
+def inspect_url(*, site_url: str, url: str, config: Config) -> dict[str, Any]:
+    """Inspect one URL via the URL Inspection API."""
+    body = {
+        "inspectionUrl": url,
+        "siteUrl": site_url,
+    }
+    data = gsc_request(
+        config,
+        "v1/urlInspection/index:inspect",
+        method="POST",
+        body=body,
+    )
+    return data or {"inspectionResult": {}}

@@ -12,21 +12,40 @@ from searchstack.config import Config
 
 def _parse_ai_overview(item: dict, domain: str) -> dict:
     """Extract citation info from a DataForSEO AI Overview result."""
-    ai_overview = item.get("ai_overview") or {}
-    ai_present = bool(ai_overview)
+    raw_direct_ai = item.get("ai_overview")
+    direct_ai = raw_direct_ai if isinstance(raw_direct_ai, dict) else {}
+    ai_items = [entry for entry in item.get("items", []) if entry.get("type") == "ai_overview"]
+    ai_present = bool(direct_ai) or bool(ai_items)
 
     cited_domains: list[str] = []
     cites_us = False
 
-    # AI Overview items contain references with links
-    for block in ai_overview.get("items", []):
-        for ref in block.get("references", []):
-            ref_domain = ref.get("domain", "")
-            ref_url = ref.get("url", "")
-            if ref_domain:
-                cited_domains.append(ref_domain)
-            if domain in ref_domain or domain in ref_url:
-                cites_us = True
+    def collect_ref(ref: dict) -> None:
+        nonlocal cites_us
+        ref_domain = ref.get("domain", "")
+        ref_url = ref.get("url", "")
+        if ref_domain:
+            cited_domains.append(ref_domain)
+        if domain in ref_domain or domain in ref_url:
+            cites_us = True
+
+    for ref in direct_ai.get("references") or []:
+        collect_ref(ref)
+
+    for block in direct_ai.get("items") or []:
+        for ref in block.get("references") or []:
+            collect_ref(ref)
+
+    for ai_item in ai_items:
+        for ref in ai_item.get("references") or []:
+            collect_ref(ref)
+        async_overview = ai_item.get("asynchronous_ai_overview")
+        if isinstance(async_overview, dict):
+            for ref in async_overview.get("references") or []:
+                collect_ref(ref)
+            for block in async_overview.get("items") or []:
+                for ref in block.get("references") or []:
+                    collect_ref(ref)
 
     return {
         "ai_present": ai_present,

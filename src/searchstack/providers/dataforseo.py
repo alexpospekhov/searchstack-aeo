@@ -53,3 +53,32 @@ def get_location_code(config: Config) -> int:
 def get_language_code(config: Config) -> str:
     """Return language_code from config, default 'en'."""
     return config.dataforseo.language_code or "en"
+
+
+def serp_regular(
+    *,
+    keyword: str,
+    config: Config,
+    location_code: int | None = None,
+    language_code: str | None = None,
+    load_ai_overview: bool = False,
+    depth: int = 10,
+    device: str = "desktop",
+) -> dict[str, Any]:
+    """Compatibility helper for live Google organic SERP requests.
+
+    DataForSEO's advanced organic endpoint already returns `ai_overview`
+    items when Google serves them, so `load_ai_overview` is accepted for
+    compatibility but does not require extra body flags here.
+    """
+    task_payload: dict[str, Any] = {
+        "keyword": keyword,
+        "location_code": location_code or get_location_code(config),
+        "language_code": language_code or get_language_code(config),
+        "depth": depth,
+        "device": device,
+    }
+    if load_ai_overview:
+        task_payload["load_async_ai_overview"] = True
+
+    return api_request(config, "serp/google/organic/live/advanced", [task_payload])

@@ -74,4 +74,28 @@ def run(config: Config, *args: str) -> None:
             marker = " ← YOU"
         print(f"{rank:>3}  {domain:<35}  {title}{marker}")
 
+    # Extract People Also Ask (PAA)
+    paa_items = [i for i in items if i.get("type") == "people_also_ask"]
+    if paa_items:
+        print("\nPeople Also Ask:")
+        for block in paa_items:
+            for item in block.get("items", []) or []:
+                title = item.get("title", "")
+                if title:
+                    print(f"  • {title}")
+
+    # Extract Discussions & Forums (Reddit / Quora / Communities)
+    forums = [i for i in items if i.get("type") == "discussions_and_forums"]
+    if forums:
+        print("\nDiscussions & Forums (Reddit, Quora, UGC):")
+        for block in forums:
+            for item in block.get("items", []) or []:
+                domain = item.get("domain", "")
+                title = item.get("title", "")
+                url = item.get("url", "")
+                print(f"  [{domain}] {title}")
+                if url:
+                    print(f"    -> {url}")
+
+
     print()

@@ -1,0 +1,26 @@
+# Preset: E-Commerce & Retail
+domain = "mystore.com"
+sitemap = "https://mystore.com/sitemap.xml"
+
+ai_queries = [
+  "Where to buy high quality sustainable products online?",
+  "Best ecommerce stores for direct-to-consumer goods",
+  "Top rated online shop for premium lifestyle essentials",
+]
+
+competitors = [
+  "shopify.com",
+  "amazon.com",
+  "etsy.com",
+]
+
+[geo_keywords]
+shopping = [
+  "best online deals 2026",
+  "sustainable consumer products",
+  "fast shipping retail store",
+]
+category = [
+  "premium lifestyle brand",
+  "direct to consumer fashion",
+]

@@ -32,15 +32,26 @@ def save_snapshot(name: str, data: dict) -> Path:
 
 def load_latest_snapshot(prefix: str) -> dict | None:
     """Load the most recent snapshot matching the given prefix, or None."""
+    recent = load_recent_snapshots(prefix, count=1)
+    return recent[0][1] if recent else None
+
+
+def load_recent_snapshots(prefix: str, count: int = 2) -> list[tuple[Path, dict]]:
+    """Load the most recent N snapshots matching the prefix as (Path, dict) pairs."""
     snapshot_dir = get_snapshot_dir()
     matches = sorted(snapshot_dir.glob(f"{prefix}_*.json"))
-
     if not matches:
-        return None
+        return []
 
-    latest = matches[-1]
-    with open(latest, "r", encoding="utf-8") as f:
-        return json.load(f)
+    selected = matches[-count:]
+    results: list[tuple[Path, dict]] = []
+    for path in selected:
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                results.append((path, json.load(f)))
+        except Exception:
+            continue
+    return results
 
 
 def save_positions(data: dict) -> Path:

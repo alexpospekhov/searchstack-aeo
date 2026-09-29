@@ -196,7 +196,7 @@ pip install searchstack
 Or from source:
 
 ```bash
-git clone https://github.com/hyperfocus-tech/searchstack.git
+git clone https://github.com/alexpospekhov/searchstack-aeo.git
 cd searchstack
 pip install -e .
 ```

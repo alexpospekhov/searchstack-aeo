@@ -346,6 +346,12 @@ def _sitemap_health(config: Config) -> list[dict]:
     print(f"\n  Sitemap Health")
     print(f"  {'─' * 80}")
 
+    def _as_int(value: Any) -> int:
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return 0
+
     results: list[dict] = []
     for sm in sitemaps:
         path = sm.get("path", "")
@@ -357,8 +363,8 @@ def _sitemap_health(config: Config) -> list[dict]:
 
         # Content details
         contents = sm.get("contents", [])
-        total_submitted = sum(c.get("submitted", 0) for c in contents)
-        total_indexed = sum(c.get("indexed", 0) for c in contents)
+        total_submitted = sum(_as_int(c.get("submitted", 0)) for c in contents)
+        total_indexed = sum(_as_int(c.get("indexed", 0)) for c in contents)
 
         status = "pending" if is_pending else "ok"
         icon = "\u26a0\ufe0f" if is_pending or errors_count or warnings_count else "\u2705"

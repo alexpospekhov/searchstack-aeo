@@ -19,9 +19,12 @@ env/
 .searchstack.toml
 credentials.json
 token.pickle
+*.pickle
+.env*
 
-# Snapshots (local data)
+# Local data & snapshots
 snapshots/
+research/
 
 # IDE
 .idea/

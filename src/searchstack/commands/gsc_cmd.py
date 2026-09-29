@@ -356,6 +356,46 @@ def _resubmit(config: Config) -> None:
         print(f"  \u274c Error: {e}")
 
 
+def _discover(config: Config) -> None:
+    """Discover traffic performance."""
+    gsc = _ensure_gsc(config)
+    if gsc is None:
+        return
+
+    start, end = _date_range()
+    print(f"\n  Google Search Console -- Google Discover Performance")
+    print(f"  Period: {start} to {end}\n")
+
+    try:
+        data = gsc.query(
+            site_url=config.gsc.site_url,
+            start_date=start,
+            end_date=end,
+            dimensions=["page"],
+            row_limit=25,
+            config=config,
+            search_type="discover",
+        )
+    except Exception as e:
+        print(f"  Error fetching Discover data: {e}")
+        return
+
+    rows = data.get("rows", [])
+    if not rows:
+        print("  No Google Discover traffic recorded in this period.")
+        return
+
+    print(f"  {'#':>3}  {'Page':<50}  {'Clicks':>7}  {'Impr':>7}  {'CTR':>6}")
+    print(f"  {'─' * 3}  {'─' * 50}  {'─' * 7}  {'─' * 7}  {'─' * 6}")
+    for idx, r in enumerate(rows, 1):
+        page = r.get("keys", [""])[0]
+        clicks = r.get("clicks", 0)
+        impr = r.get("impressions", 0)
+        ctr = _fmt_ctr(r.get("ctr", 0))
+        print(f"  {idx:>3}  {page:<50}  {clicks:>7}  {impr:>7}  {ctr:>6}")
+    print()
+
+
 SUBCOMMANDS = {
     "pages-perf": _pages_perf,
     "devices": _devices,
@@ -363,6 +403,7 @@ SUBCOMMANDS = {
     "trend": _trend,
     "sitemaps": _sitemaps,
     "resubmit": _resubmit,
+    "discover": _discover,
 }
 
 
@@ -378,6 +419,7 @@ def run(config: Config, *args: str) -> None:
         searchstack gsc sitemaps           # list sitemaps
         searchstack gsc inspect <url>      # check URL indexing
         searchstack gsc resubmit           # resubmit sitemap
+        searchstack gsc discover           # Google Discover traffic
     """
     if not args:
         _top_queries(config)

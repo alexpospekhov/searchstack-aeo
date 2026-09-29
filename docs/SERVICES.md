@@ -12,14 +12,16 @@ Step-by-step instructions for connecting every external service that searchstack
 |---|---------|-----------|------|------------|-------------|-------------------|
 | 1 | [Google Search Console](#1-google-search-console) | **Yes** | Free | `[gsc]` | — | `gsc`, `pages`, `report` |
 | 2 | [DataForSEO](#2-dataforseo) | **Yes** | $50 prepaid | `[dataforseo]` | `DATAFORSEO_LOGIN`, `DATAFORSEO_PASSWORD` | `geo`, `keywords`, `competitors`, `gaps`, `serp`, `track`, `bulk`, `backlinks` |
-| 3 | [OpenAI](#3-openai-chatgpt) | For AEO | ~$0.001/query | `[openai]` | `OPENAI_API_KEY` | `ai`, `ai chatgpt` |
-| 4 | [Perplexity](#4-perplexity) | For AEO | ~$0.005/query | `[perplexity]` | `PERPLEXITY_API_KEY` | `ai`, `ai perplexity` |
-| 5 | [Anthropic](#5-anthropic-claude) | For AEO | ~$0.001/query | `[anthropic]` | `ANTHROPIC_API_KEY` | `ai`, `ai claude` |
-| 6 | [Grok (xAI)](#6-grok-xai) | For AEO | ~$0.002/query | `[grok]` | `XAI_API_KEY` | `ai`, `ai grok` |
-| 7 | [Plausible](#7-plausible-analytics) | Optional | $9/mo or self-hosted | `[plausible]` | `PLAUSIBLE_API_KEY` | `traffic` |
-| 8 | [Bing Webmaster](#8-bing-webmaster-tools) | Recommended | Free | `[bing]` | `BING_WEBMASTER_API_KEY` | `bing` |
-| 9 | [IndexNow](#9-indexnow) | Recommended | Free | `[indexnow]` | — | `indexnow` |
-| 10 | [Google Ads Keyword Planner](#10-google-ads-keyword-planner-optional) | Optional | Free (needs Ads account) | `[google_ads]` | `GOOGLE_ADS_DEVELOPER_TOKEN` | `audit` (volume data) |
+| 3 | [Google Gemini](#3-google-gemini) | For AEO | Free tier / Payg | `[gemini]` | `GEMINI_API_KEY` | `ai`, `ai gemini` |
+| 4 | [OpenAI](#4-openai-chatgpt) | For AEO | ~$0.001/query | `[openai]` | `OPENAI_API_KEY` | `ai`, `ai chatgpt` |
+| 5 | [Perplexity](#5-perplexity) | For AEO | ~$0.005/query | `[perplexity]` | `PERPLEXITY_API_KEY` | `ai`, `ai perplexity` |
+| 6 | [Anthropic](#6-anthropic-claude) | For AEO | ~$0.001/query | `[anthropic]` | `ANTHROPIC_API_KEY` | `ai`, `ai claude` |
+| 7 | [Grok (xAI)](#7-grok-xai) | For AEO | ~$0.002/query | `[grok]` | `XAI_API_KEY` | `ai`, `ai grok` |
+| 8 | [Google Knowledge Graph](#8-google-knowledge-graph) | For Brand Authority | Free tier | `[gemini]` or `[gsc]` | `GOOGLE_API_KEY` / `GEMINI_API_KEY` | `entity` |
+| 9 | [Plausible](#9-plausible-analytics) | Optional | $9/mo or self-hosted | `[plausible]` | `PLAUSIBLE_API_KEY` | `traffic` |
+| 10 | [Bing Webmaster](#10-bing-webmaster-tools) | Recommended | Free | `[bing]` | `BING_WEBMASTER_API_KEY` | `bing`, `backlinks` |
+| 11 | [IndexNow](#11-indexnow) | Recommended | Free | `[indexnow]` | — | `indexnow` |
+| 12 | [Google Ads Keyword Planner](#12-google-ads-keyword-planner-optional) | Optional | Free (needs Ads account) | `[google_ads]` | `GOOGLE_ADS_DEVELOPER_TOKEN` | `audit` (volume data) |
 
 Every key goes into **one of two places:**
 
@@ -668,9 +670,13 @@ export GOOGLE_ADS_CUSTOMER_ID="..."
 
 ## Verification Checklist
 
-After setting up all services, run these commands to verify everything works:
+After setting up services, run `searchstack doctor` to verify all credentials and endpoints at once:
 
 ```bash
+# Test all 12 services simultaneously
+searchstack doctor
+# Expected: Live capability & credentials status table for all services
+
 # Test Google Search Console
 searchstack gsc
 # Expected: table of your top queries with clicks/impressions

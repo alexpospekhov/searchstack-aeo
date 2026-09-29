@@ -1,16 +1,19 @@
 """Configuration loader for searchstack.
 
 Reads from .searchstack.toml (CWD first, then ~/.config/searchstack/config.toml),
-overlays environment variables, and returns typed Config dataclass.
+supports named presets, overlays environment variables and system secret stores,
+and returns a typed Config dataclass.
 """
 
 from __future__ import annotations
 
 import base64
+from functools import lru_cache
 import os
+from pathlib import Path
+import subprocess
 import sys
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any
 
 if sys.version_info >= (3, 11):
@@ -109,6 +112,7 @@ class Config:
     perplexity: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     anthropic: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     grok: ApiKeyConfig = field(default_factory=ApiKeyConfig)
+    gemini: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     ollama: OllamaConfig = field(default_factory=OllamaConfig)
     openrouter: OpenrouterConfig = field(default_factory=OpenrouterConfig)
     plausible: PlausibleConfig = field(default_factory=PlausibleConfig)
@@ -121,11 +125,38 @@ class Config:
 
 
 # ---------------------------------------------------------------------------
-# Internal helpers
+# Presets and paths
 # ---------------------------------------------------------------------------
 
+PRESET_DIRS = [
+    Path.cwd() / "presets",
+    Path.home() / ".config" / "searchstack" / "presets",
+]
+
+
+def _find_preset(preset_name: str) -> Path | None:
+    filename = preset_name if preset_name.endswith(".toml") else f"{preset_name}.toml"
+    for pdir in PRESET_DIRS:
+        candidate = pdir / filename
+        if candidate.is_file():
+            return candidate
+    return None
+
+
 def _find_toml() -> Path | None:
-    """Find the first .searchstack.toml: CWD, then ~/.config/searchstack/."""
+    """Find the default config file: env var, preset, CWD, then ~/.config/searchstack/."""
+    env_path = os.environ.get("SEARCHSTACK_CONFIG", "").strip()
+    if env_path:
+        resolved = Path(env_path).expanduser()
+        if resolved.is_file():
+            return resolved
+
+    env_preset = os.environ.get("SEARCHSTACK_PRESET", "").strip()
+    if env_preset:
+        preset_file = _find_preset(env_preset)
+        if preset_file:
+            return preset_file
+
     cwd_path = Path.cwd() / ".searchstack.toml"
     if cwd_path.is_file():
         return cwd_path
@@ -172,6 +203,7 @@ def _build_config(raw: dict[str, Any]) -> Config:
         perplexity=ApiKeyConfig(api_key=_get_nested(raw, "perplexity", "api_key")),
         anthropic=ApiKeyConfig(api_key=_get_nested(raw, "anthropic", "api_key")),
         grok=ApiKeyConfig(api_key=_get_nested(raw, "grok", "api_key")),
+        gemini=ApiKeyConfig(api_key=_get_nested(raw, "gemini", "api_key")),
         ollama=OllamaConfig(
             base_url=_get_nested(raw, "ollama", "base_url") or "http://localhost:11434/v1",
             model=_get_nested(raw, "ollama", "model"),
@@ -213,11 +245,16 @@ _ENV_MAP: dict[str, tuple[str, ...]] = {
     "PERPLEXITY_API_KEY": ("perplexity", "api_key"),
     "ANTHROPIC_API_KEY": ("anthropic", "api_key"),
     "XAI_API_KEY": ("grok", "api_key"),
+    "GROK_API_KEY": ("grok", "api_key"),
+    "GEMINI_API_KEY": ("gemini", "api_key"),
     "OPENROUTER_API_KEY": ("openrouter", "api_key"),
     "PLAUSIBLE_API_KEY": ("plausible", "api_key"),
     "BING_WEBMASTER_API_KEY": ("bing", "api_key"),
     "GOOGLE_ADS_DEVELOPER_TOKEN": ("google_ads", "developer_token"),
     "GOOGLE_ADS_CUSTOMER_ID": ("google_ads", "customer_id"),
+    "GOOGLE_ADS_CLIENT_ID": ("google_ads", "client_id"),
+    "GOOGLE_ADS_CLIENT_SECRET": ("google_ads", "client_secret"),
+    "GOOGLE_ADS_REFRESH_TOKEN": ("google_ads", "refresh_token"),
 }
 
 
@@ -233,20 +270,142 @@ def _overlay_env(cfg: Config) -> None:
         setattr(obj, attr_path[-1], value)
 
 
+@lru_cache(maxsize=64)
+def _get_keychain_secret(secret_name: str) -> str:
+    """Fetch secret from macOS Keychain via `security find-generic-password`."""
+    if sys.platform != "darwin":
+        return ""
+    candidates = [
+        secret_name,
+        f"hf-{secret_name}",
+        secret_name.replace("-", "_"),
+        secret_name.replace("_", "-"),
+    ]
+    seen: set[str] = set()
+    for name in candidates:
+        if name in seen:
+            continue
+        seen.add(name)
+        try:
+            proc = subprocess.run(
+                ["security", "find-generic-password", "-s", name, "-w"],
+                capture_output=True,
+                text=True,
+                timeout=2,
+                check=False,
+            )
+            if proc.returncode == 0 and proc.stdout.strip():
+                return proc.stdout.strip()
+        except Exception:
+            pass
+    return ""
+
+
+@lru_cache(maxsize=64)
+def _get_gsm_secret(secret_name: str, gcp_project: str) -> str:
+    """Fetch secret from Google Secret Manager if GCP project is set."""
+    if not gcp_project:
+        return ""
+    try:
+        proc = subprocess.run(
+            [
+                "gcloud",
+                "secrets",
+                "versions",
+                "access",
+                "latest",
+                f"--secret={secret_name}",
+                f"--project={gcp_project}",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=8,
+            check=False,
+        )
+        if proc.returncode == 0 and proc.stdout.strip():
+            return proc.stdout.strip()
+    except Exception:
+        pass
+    return ""
+
+
+def _overlay_secret_manager(cfg: Config) -> None:
+    """Optionally overlay secrets from macOS Keychain or Google Secret Manager."""
+    gcp_proj = os.environ.get("SEARCHSTACK_GCP_PROJECT", "") or cfg.gsc.gcp_project
+
+    def get_sec(name: str) -> str:
+        kc = _get_keychain_secret(name)
+        if kc:
+            return kc
+        if gcp_proj:
+            return _get_gsm_secret(name, gcp_proj)
+        return ""
+
+    if not cfg.dataforseo.login:
+        cfg.dataforseo.login = get_sec("dataforseo-login")
+    if not cfg.dataforseo.password:
+        cfg.dataforseo.password = get_sec("dataforseo-password")
+
+    secret_keys: dict[tuple[str, ...], str] = {
+        ("openai", "api_key"): "openai-api-key",
+        ("perplexity", "api_key"): "perplexity-api-key",
+        ("anthropic", "api_key"): "anthropic-api-key",
+        ("grok", "api_key"): "xai-api-key",
+        ("gemini", "api_key"): "gemini-api-key",
+        ("openrouter", "api_key"): "openrouter-api-key",
+        ("plausible", "api_key"): "plausible-api-key",
+        ("bing", "api_key"): "bing-webmaster-api-key",
+    }
+
+    for (section, attr), sec_name in secret_keys.items():
+        obj = getattr(cfg, section)
+        if not getattr(obj, attr):
+            val = get_sec(sec_name)
+            if val:
+                setattr(obj, attr, val)
+
+
+def _apply_defaults(cfg: Config) -> None:
+    """Apply intelligent defaults based on domain if provided."""
+    if cfg.domain:
+        if not cfg.sitemap:
+            cfg.sitemap = f"https://{cfg.domain}/sitemap.xml"
+        if not cfg.gsc.site_url:
+            cfg.gsc.site_url = f"sc-domain:{cfg.domain}"
+        if not cfg.plausible.site_id:
+            cfg.plausible.site_id = cfg.domain
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
-def load_config() -> Config:
+def load_config(config_path: Path | str | None = None) -> Config:
     """Load configuration from TOML file + environment variable overrides."""
-    toml_path = _find_toml()
+    toml_path: Path | None = None
+
+    if config_path is not None:
+        p = Path(config_path).expanduser()
+        if p.is_file():
+            toml_path = p
+        else:
+            preset = _find_preset(str(config_path))
+            if preset:
+                toml_path = preset
+            else:
+                toml_path = _find_toml()
+    else:
+        toml_path = _find_toml()
+
     raw: dict[str, Any] = {}
 
-    if toml_path is not None:
+    if toml_path is not None and toml_path.is_file():
         with open(toml_path, "rb") as f:
             raw = tomllib.load(f)
 
     cfg = _build_config(raw)
+    _apply_defaults(cfg)
+    _overlay_secret_manager(cfg)
     _overlay_env(cfg)
     return cfg
 
