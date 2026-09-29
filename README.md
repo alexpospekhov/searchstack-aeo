@@ -29,14 +29,19 @@ If you've ever wondered *"Does ChatGPT know my product exists?"* — this tool a
 |---------|:-----------:|:-----------------:|:-------------------:|:----------:|
 | Google rankings (GSC) | ✅ | ✅ | ✅ | ✅ GSC only |
 | Keyword research | ✅ | ✅ | ✅ | ❌ |
-| Backlink analysis | ✅ | ✅ | ✅ | ❌ |
+| Backlink analysis (DataForSEO + Bing) | ✅ | ✅ | ✅ | ❌ |
 | Technical audit | ✅ | ✅ | ✅ | Partial |
+| **Google Gemini Grounding check** | ✅ | ❌ | ❌ | ❌ |
 | **ChatGPT citation check** | ✅ | ❌ | ❌ | ❌ |
 | **Perplexity citation check** | ✅ | ❌ | ❌ | ❌ |
 | **Claude citation check** | ✅ | ❌ | ❌ | ❌ |
 | **Grok (xAI) citation check** | ✅ | ❌ | ❌ | ❌ |
 | **Local LLM check (Ollama)** | ✅ | ❌ | ❌ | ❌ |
 | **Google AI Overview monitor** | ✅ | ❌ | ❌ | ❌ |
+| **People Also Ask (PAA) extraction** | ✅ | ❌ | ❌ | ❌ |
+| **Knowledge Graph Entity check** | ✅ | ❌ | ❌ | ❌ |
+| **Snapshot temporal diffing** | ✅ | ❌ | ❌ | ❌ |
+| **1-Click Doctor diagnostics** | ✅ | ❌ | ❌ | ❌ |
 | **AI referral tracking** | ✅ | ❌ | ❌ | ❌ |
 | CLI / scriptable | ✅ | ❌ | ❌ | ❌ |
 | Cron / server deploy | ✅ | ❌ | ❌ | ❌ |
@@ -44,7 +49,7 @@ If you've ever wondered *"Does ChatGPT know my product exists?"* — this tool a
 | Open source | ✅ | ❌ | ❌ | Varies |
 | Monthly cost | **~$5** | $99-999 | $130-500 | $0 (limited) |
 
-The bottom 5 rows are what no existing tool does. That's why searchstack exists.
+The bold rows are what traditional SEO tools (Ahrefs/Semrush) don't do at all. That's why searchstack exists.
 
 ---
 
@@ -94,7 +99,12 @@ $ searchstack ai
     "How to solve Y?"                    ❌ not cited
     "Top Z software in 2026"             ❌ not cited
 
-  Summary: ChatGPT 2/3 | Perplexity 2/3 | Claude 0/3
+  Gemini (gemini-2.5-flash):
+    "What is the best tool for X?"      ✅ CITED  [searched: "best tool X 2026"]
+    "How to solve Y?"                    ❌ not cited
+    "Top Z software in 2026"             ✅ CITED  [searched: "top z software comparison"]
+
+  Summary: ChatGPT 2/3 | Perplexity 2/3 | Claude 0/3 | Gemini 2/3
   Saved: ~/.searchstack/snapshots/ai_citations_20260401_1200.json
 ```
 
@@ -170,9 +180,12 @@ searchstack ai          # are AI chatbots citing you?
 searchstack geo         # does Google AI Overview cite you?
 searchstack gsc         # your Google rankings
 searchstack report      # full 14-section Markdown report
+
+# Or run instantly with built-in industry presets (zero manual setup):
+searchstack --preset saas-starter report
 ```
 
-See [Services Setup Guide](docs/SERVICES.md) for connecting all 9 services step by step.
+See [Services Setup Guide](docs/SERVICES.md) for connecting all 12 services step by step.
 
 ---
 
@@ -202,11 +215,15 @@ searchstack llms check               # check if your site has AI-ready files
 searchstack gsc                      # top queries with clicks, impressions, CTR, position
 searchstack gsc discover             # Google Discover feed queries and clicks
 searchstack gsc pages-perf           # top pages
+searchstack gsc devices              # device breakdown (desktop, mobile, tablet)
+searchstack gsc countries            # country breakdown by impressions & clicks
 searchstack gsc trend                # daily trend
+searchstack gsc sitemaps             # list submitted sitemaps & crawl status
 searchstack gsc inspect <url>        # check if URL is indexed
 searchstack questions "phrase"       # People Also Ask (PAA) questions with answers (0 cost)
 searchstack keywords "phrase"        # keyword suggestions with volumes
 searchstack competitors              # your ranked keywords vs competitors
+searchstack competitor study <url>   # deep competitor research & propose keyword candidates
 searchstack gaps                     # high-volume keywords where you rank poorly
 searchstack serp "query"             # live SERP top-10 + forums/Reddit + PAA
 searchstack track                    # position changes since last check
@@ -239,7 +256,9 @@ searchstack gsc resubmit             # resubmit sitemap to Google
 
 ```bash
 searchstack doctor                   # live capability check for all 12 services
-searchstack diff                     # diff consecutive snapshots (citations, health, rank)
+searchstack diff ai                  # diff latest AI citation snapshots (+ GAINED, - LOST)
+searchstack diff doctor              # diff provider health & credentials status
+searchstack diff geo                 # diff Google AI Overview changes
 searchstack monitor                  # site health: traffic + rankings + indexing per page
 searchstack audit                    # full SEO audit with keyword volumes + opportunity scores
 searchstack report                   # full Markdown report (14 sections)
@@ -383,10 +402,11 @@ Monthly cost: **$5-10** for full daily monitoring, **$1-2** for weekly AEO/GEO o
 All keys via `.searchstack.toml` or environment variables (env vars take priority):
 
 ```bash
-export DATAFORSEO_LOGIN="email"          export DATAFORSEO_PASSWORD="pass"
 export OPENAI_API_KEY="sk-..."           export PERPLEXITY_API_KEY="pplx-..."
 export ANTHROPIC_API_KEY="sk-ant-..."    export XAI_API_KEY="xai-..."
+export GEMINI_API_KEY="AIza..."          export OPENROUTER_API_KEY="sk-or-..."
 export PLAUSIBLE_API_KEY="key"           export BING_WEBMASTER_API_KEY="key"
+export DATAFORSEO_LOGIN="email"          export DATAFORSEO_PASSWORD="pass"
 ```
 
 Full config template: [docs/SERVICES.md](docs/SERVICES.md#full-config-file-template)
@@ -509,16 +529,16 @@ CMD ["searchstack", "report"]
 ## FAQ
 
 <details>
-<summary><strong>Do I need all 9 services?</strong></summary>
+<summary><strong>Do I need all 12 services?</strong></summary>
 
-No. Each command gracefully skips unavailable services. You can start with just the free tools (`meta`, `schema`, `links`, `onpage`) and add API keys as needed. The most impactful paid service is DataForSEO ($50 one-time) — it unlocks GEO monitoring, keyword research, and competitor analysis.
+No. Each command gracefully skips unavailable services. You can start with just the free tools (`meta`, `schema`, `links`, `onpage`, `doctor`) and add API keys as needed. The most impactful paid service is DataForSEO ($50 one-time) — it unlocks GEO monitoring, keyword research, and competitor analysis.
 
 </details>
 
 <details>
 <summary><strong>How much does it actually cost per month?</strong></summary>
 
-- **$0/mo** — GSC + technical audit (meta, schema, links, onpage, pages)
+- **$0/mo** — GSC + technical audit (meta, schema, links, onpage, pages) + Bing backlinks + local LLMs (Ollama)
 - **$1-2/mo** — add weekly AEO + GEO monitoring
 - **$5-10/mo** — full daily monitoring including all API calls
 - **$50 one-time** — DataForSEO deposit (lasts months, no subscription)
@@ -530,7 +550,7 @@ Compare: Ahrefs starts at $99/mo, Semrush at $130/mo, and neither tracks AI visi
 <details>
 <summary><strong>Does searchstack work without DataForSEO?</strong></summary>
 
-Yes. Without DataForSEO you lose: keyword research, live SERP, GEO monitoring, competitor analysis, backlink checks, and position tracking. You keep: GSC rankings, AEO citation checks (ChatGPT/Perplexity/Claude/Grok), Plausible traffic, technical audit, Bing submission, and IndexNow.
+Yes. Without DataForSEO you lose keyword research and Google AI Overview (GEO) SERP tracking. You keep: GSC rankings, AEO citation checks across all 6 engines (Gemini, ChatGPT, Perplexity, Claude, Grok, Ollama), free backlink telemetry via Bing Webmaster API, brand authority via Google Knowledge Graph (`entity`), Plausible traffic, technical audit, Bing submission, IndexNow, and 1-click health diagnostics (`doctor`).
 
 </details>
 
@@ -544,7 +564,18 @@ For technical SEO and AI search monitoring — yes. For features like site explo
 <details>
 <summary><strong>Can I monitor multiple sites?</strong></summary>
 
-Currently one site per config file. For multiple sites, use separate `.searchstack.toml` files and run with `--config` flag (coming soon) or separate directories.
+Yes. Use separate config files and pass them with the `-c` / `--config` flag:
+
+```bash
+searchstack --config /path/to/client-site.toml report
+```
+
+Or run instantly with built-in industry presets:
+
+```bash
+searchstack --preset saas-starter report
+searchstack --preset developer-tools doctor
+```
 
 </details>
 
