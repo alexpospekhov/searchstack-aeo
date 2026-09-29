@@ -146,6 +146,29 @@ def _cmd_default(config: Config) -> None:
     print()
 
 
+def _cmd_links(config: Config) -> None:
+    """Show inbound links discovered by Bing Webmaster Tools."""
+    from searchstack.providers.bing import get_inbound_links
+    site_url = get_site_url(config)
+    print(f"\n  Inbound Links for {site_url}:")
+    data = get_inbound_links(config)
+    if "error" in data:
+        print(f"    \u274c {data['error']}")
+        return
+
+    items = data.get("d", [])
+    if isinstance(items, list) and items:
+        for idx, item in enumerate(items[:20], 1):
+            src = item.get("SourceUrl") or item.get("Url", "")
+            dst = item.get("TargetUrl", "")
+            print(f"    {idx:>2}. {src}")
+            if dst:
+                print(f"        -> {dst}")
+    else:
+        print("    No inbound link data available.")
+    print()
+
+
 # ---------------------------------------------------------------------------
 # Command entry point
 # ---------------------------------------------------------------------------
@@ -157,6 +180,7 @@ def run(config: Config, *args: str) -> None:
         searchstack bing              # show quota + query stats
         searchstack bing submit       # submit all sitemap URLs
         searchstack bing sitemap      # submit sitemap feed
+        searchstack bing links        # show free inbound links
     """
     if not config.bing.api_key:
         print("  No Bing API key configured. Set [bing] api_key in .searchstack.toml")
@@ -168,5 +192,7 @@ def run(config: Config, *args: str) -> None:
         _cmd_submit(config)
     elif subcmd == "sitemap":
         _cmd_sitemap(config)
+    elif subcmd == "links":
+        _cmd_links(config)
     else:
         _cmd_default(config)

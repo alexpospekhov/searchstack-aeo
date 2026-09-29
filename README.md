@@ -62,11 +62,17 @@ The bottom 5 rows are what no existing tool does. That's why searchstack exists.
 - **llms.txt Generator** — `searchstack llms generate` creates llms.txt + llms-full.txt from your sitemap following the [llmstxt.org](https://llmstxt.org) spec. Validate with `searchstack llms validate`.
 - **Content Monitor** — `searchstack monitor` shows per-page performance: rankings, clicks, indexing status, keyword tracking, changes since last check.
 - **SEO Audit** — `searchstack audit` combines GSC data with keyword volumes, calculates opportunity scores, finds content gaps.
+- **Doctor & Health Diagnostics** — `searchstack doctor` tests and verifies API credentials and connectivity across all 12 services in one go.
+- **Visual Diff** — `searchstack diff` tracks citation gains/losses, rank changes, and service health across consecutive snapshots.
+- **People Also Ask & Questions** — `searchstack questions` extracts Google PAA questions, direct answers, and source URLs at zero extra API cost.
+- **Brand Entity Authority** — `searchstack entity` inspects how Google's Knowledge Graph categorizes your brand and evaluates authority scores.
 - **Markdown Reports** — `searchstack report` generates a full 14-section .md file with executive summary and auto-recommendations. Run it monthly, diff the results, track progress over time.
 - **Local LLM Support** — run AEO checks against Ollama, LM Studio, vLLM, or any OpenAI-compatible local model. Test how open-source models (Qwen, Llama, Mistral, Gemma) represent your brand — completely free, no API keys, runs offline.
+- **Google Gemini Grounding** — check citations in Gemini with Google Search Grounding to inspect internal web search queries and citation sources.
+- **Industry Presets** — launch immediately with built-in templates (`--preset saas-starter`, `--preset developer-tools`, `--preset ecommerce`).
 - **Cron-ready** — pure CLI, no GUI, no browser. Deploy on any server, schedule via cron (`0 8 * * 1 searchstack report`), pipe output to Slack/email. Built for automation.
 
-**22 commands. 10 API integrations (5 cloud AI + local LLMs). One config file. Runs anywhere Python runs.**
+**26+ commands. 12 API integrations (6 AI providers + local LLMs + Google/Bing). One config file. Runs anywhere Python runs.**
 
 ```
 $ searchstack ai
@@ -175,7 +181,8 @@ See [Services Setup Guide](docs/SERVICES.md) for connecting all 9 services step 
 ### AEO / GEO — AI Search Visibility
 
 ```bash
-searchstack ai                       # citation check: ChatGPT + Perplexity + Claude + Grok
+searchstack ai                       # citation check: Gemini + ChatGPT + Perplexity + Claude + Grok
+searchstack ai gemini                # Google Gemini (with Search Grounding)
 searchstack ai chatgpt               # ChatGPT only
 searchstack ai perplexity            # Perplexity only
 searchstack ai claude                # Claude only
@@ -183,6 +190,7 @@ searchstack ai grok                  # Grok (xAI) only
 searchstack ai ollama                # local model (Ollama/LM Studio/vLLM)
 searchstack geo                      # Google AI Overview for all target keywords
 searchstack geo "your keyword"       # single keyword check
+searchstack entity "brand or query"  # Google Knowledge Graph entity & authority check
 searchstack llms generate            # generate llms.txt + llms-full.txt from your sitemap
 searchstack llms validate            # validate existing llms.txt against spec
 searchstack llms check               # check if your site has AI-ready files
@@ -192,16 +200,18 @@ searchstack llms check               # check if your site has AI-ready files
 
 ```bash
 searchstack gsc                      # top queries with clicks, impressions, CTR, position
+searchstack gsc discover             # Google Discover feed queries and clicks
 searchstack gsc pages-perf           # top pages
 searchstack gsc trend                # daily trend
 searchstack gsc inspect <url>        # check if URL is indexed
+searchstack questions "phrase"       # People Also Ask (PAA) questions with answers (0 cost)
 searchstack keywords "phrase"        # keyword suggestions with volumes
 searchstack competitors              # your ranked keywords vs competitors
 searchstack gaps                     # high-volume keywords where you rank poorly
-searchstack serp "query"             # live SERP top-10
+searchstack serp "query"             # live SERP top-10 + forums/Reddit + PAA
 searchstack track                    # position changes since last check
 searchstack bulk domain1 domain2     # competitor traffic comparison
-searchstack backlinks                # your backlink profile
+searchstack backlinks                # your backlink profile (DataForSEO + Bing fallback)
 searchstack backlinks competitor.com # competitor's backlinks
 ```
 
@@ -225,32 +235,37 @@ searchstack bing submit              # submit URLs to Bing
 searchstack gsc resubmit             # resubmit sitemap to Google
 ```
 
-### Dashboards & Reporting
+### Diagnostics, Diff & Reporting
 
 ```bash
+searchstack doctor                   # live capability check for all 12 services
+searchstack diff                     # diff consecutive snapshots (citations, health, rank)
 searchstack monitor                  # site health: traffic + rankings + indexing per page
 searchstack audit                    # full SEO audit with keyword volumes + opportunity scores
 searchstack report                   # full Markdown report (14 sections)
+searchstack --preset saas-starter report  # run with preset config
 ```
 
 ---
 
 ## Services
 
-9 integrations. None required — each command gracefully skips unavailable services.
+12 integrations. None required — each command gracefully skips unavailable services.
 
 | # | Service | Cost | What it unlocks |
 |---|---------|------|----------------|
-| 1 | **[Google Search Console](https://search.google.com/search-console)** | Free | Rankings, clicks, indexing status |
-| 2 | **[DataForSEO](https://dataforseo.com)** | $50 prepaid | Keywords, SERP, AI Overview, backlinks |
-| 3 | **[OpenAI](https://platform.openai.com)** | ~$0.001/query | ChatGPT citation check |
-| 4 | **[Perplexity](https://docs.perplexity.ai)** | ~$0.005/query | Perplexity citation check (best — returns source URLs) |
-| 5 | **[Anthropic](https://console.anthropic.com)** | ~$0.001/query | Claude citation check |
-| 6 | **[xAI](https://console.x.ai)** | ~$0.002/query | Grok citation check |
-| 7 | **[Plausible](https://plausible.io)** | $9/mo | Traffic analytics, AI referral tracking |
-| 8 | **[Bing Webmaster](https://www.bing.com/webmasters)** | Free | Bing stats, URL submission |
-| 9 | **[IndexNow](https://www.indexnow.org)** | Free | Instant Bing/Yandex notification |
-| 10 | **[Ollama](https://ollama.com)** / any local LLM | Free | Test local models (Qwen, Llama, Mistral, Gemma) |
+| 1 | **[Google Search Console](https://search.google.com/search-console)** | Free | Rankings, clicks, indexing status, Discover |
+| 2 | **[DataForSEO](https://dataforseo.com)** | $50 prepaid | Keywords, SERP, AI Overview, PAA, backlinks |
+| 3 | **[Google Gemini](https://ai.google.dev)** | Free tier / Payg | Gemini with Google Search Grounding |
+| 4 | **[OpenAI](https://platform.openai.com)** | ~$0.001/query | ChatGPT citation check |
+| 5 | **[Perplexity](https://docs.perplexity.ai)** | ~$0.005/query | Perplexity citation check (returns source URLs) |
+| 6 | **[Anthropic](https://console.anthropic.com)** | ~$0.001/query | Claude citation check |
+| 7 | **[xAI](https://console.x.ai)** | ~$0.002/query | Grok citation check |
+| 8 | **[Google Knowledge Graph](https://developers.google.com/knowledge-graph)** | Free tier | Brand authority & entity validation |
+| 9 | **[Plausible](https://plausible.io)** | $9/mo | Traffic analytics, AI referral tracking |
+| 10 | **[Bing Webmaster](https://www.bing.com/webmasters)** | Free | Bing stats, URL submission, free backlinks |
+| 11 | **[IndexNow](https://www.indexnow.org)** | Free | Instant Bing/Yandex notification |
+| 12 | **[Ollama](https://ollama.com)** / any local LLM | Free | Test local models (Qwen, Llama, Mistral, Gemma) |
 
 **Why Bing matters:** ChatGPT Search, Perplexity, and Microsoft Copilot all use Bing as their search backend. If you're not in Bing, you're invisible to 3 major AI search products.
 
@@ -382,37 +397,42 @@ Full config template: [docs/SERVICES.md](docs/SERVICES.md#full-config-file-templ
 
 ```
 src/searchstack/
-├── cli.py              # argparse entry point
-├── config.py           # .searchstack.toml + env loading
-├── snapshots.py        # JSON snapshot save/load/compare
+├── cli.py              # argparse entry point & command routing
+├── config.py           # .searchstack.toml + env loading + presets
+├── snapshots.py        # JSON snapshot save/load/compare & diffing
 ├── providers/          # API clients (one per service)
-│   ├── gsc.py            # Google Search Console
-│   ├── dataforseo.py     # DataForSEO
+│   ├── gsc.py            # Google Search Console (OAuth flow + Discover)
+│   ├── dataforseo.py     # DataForSEO (SERP, PAA, UGC forums, async GEO)
+│   ├── gemini.py         # Google Gemini (Google Search Grounding)
 │   ├── plausible.py      # Plausible Analytics
-│   ├── bing.py           # Bing Webmaster
+│   ├── bing.py           # Bing Webmaster (inbound links & stats)
 │   ├── openai.py         # OpenAI (ChatGPT)
 │   ├── perplexity.py     # Perplexity
 │   ├── anthropic.py      # Anthropic (Claude)
 │   ├── grok.py           # Grok (xAI)
 │   └── google_ads.py     # Google Ads Keyword Planner
 └── commands/           # one file per CLI command
-    ├── ai.py             # AEO citation check
+    ├── ai.py             # AEO citation check (6 engines + local)
     ├── geo.py            # GEO AI Overview monitor
-    ├── gsc.py            # Google Search Console
+    ├── entity.py         # Google Knowledge Graph brand authority
+    ├── doctor.py         # 12-service live capability & credential check
+    ├── diff.py           # Visual temporal diffing of snapshots
+    ├── gsc_cmd.py        # Google Search Console & Discover
     ├── traffic.py        # Plausible traffic
     ├── keywords.py       # keyword suggestions
+    ├── questions.py      # People Also Ask (PAA) questions
     ├── competitors.py    # competitor analysis
     ├── gaps.py           # keyword gaps
-    ├── serp.py           # live SERP
+    ├── serp.py           # live SERP + UGC forums + PAA
     ├── track.py          # position tracking
-    ├── backlinks.py      # backlink profile
+    ├── backlinks.py      # backlink profile (DataForSEO + Bing fallback)
     ├── meta.py           # meta tag audit
     ├── schema.py         # JSON-LD validation
     ├── links.py          # internal linking
     ├── onpage.py         # on-page scoring
     ├── pages.py          # indexing status
     ├── indexnow.py       # IndexNow submission
-    ├── bing.py           # Bing Webmaster
+    ├── bing_cmd.py       # Bing Webmaster submission & stats
     ├── report.py         # Markdown report generator
     ├── monitor.py        # Site health monitor
     ├── audit.py          # SEO audit with opportunity scores
@@ -541,7 +561,10 @@ Microsoft invested $13B in OpenAI. As part of the deal, ChatGPT Search uses Bing
 
 - [ ] `searchstack init` — interactive setup wizard
 - [ ] `searchstack cron` — scheduled monitoring via system cron
-- [ ] `searchstack diff` — visual diff between report snapshots
+- [x] `searchstack diff` — visual diff between report snapshots (shipped in v1.0.0)
+- [x] `searchstack doctor` — live capability & health diagnostics (shipped in v1.0.0)
+- [x] `searchstack questions` — People Also Ask & question extraction (shipped in v1.0.0)
+- [x] `searchstack entity` — Google Knowledge Graph authority evaluation (shipped in v1.0.0)
 - [ ] `searchstack dashboard` — local HTML dashboard
 - [ ] Reddit, HackerNews, Twitter mention tracking
 - [ ] YouTube search visibility

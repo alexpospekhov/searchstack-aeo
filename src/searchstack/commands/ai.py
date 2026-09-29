@@ -5,7 +5,7 @@ from __future__ import annotations
 from searchstack import snapshots
 from searchstack.config import Config
 
-PROVIDERS = ("chatgpt", "perplexity", "claude", "grok", "ollama")
+PROVIDERS = ("chatgpt", "perplexity", "claude", "grok", "gemini", "ollama")
 
 
 def _check_provider(
@@ -48,6 +48,12 @@ def _check_provider(
             return {"provider": provider, "results": [], "cited": 0, "total": 0}
         from searchstack.providers import grok
         check_fn = grok.check_citation
+    elif provider == "gemini":
+        if not config.gemini.api_key:
+            print("  Skipping Gemini -- GEMINI_API_KEY not configured")
+            return {"provider": provider, "results": [], "cited": 0, "total": 0}
+        from searchstack.providers import gemini
+        check_fn = gemini.check_citation
     elif provider == "ollama":
         if not config.ollama.model:
             print(f"  Skipping Ollama -- [ollama] model not configured")

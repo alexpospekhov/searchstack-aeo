@@ -1,12 +1,12 @@
 """llms.txt generator and validator.
 
-Generates and validates llms.txt and llms-full.txt files
+Generates and validates llms.txt and llms-full.md files
 following the llmstxt.org specification.
 
 These files help AI models understand your site and cite it correctly.
 
 Usage:
-    searchstack llms generate          # generate llms.txt + llms-full.txt
+    searchstack llms generate          # generate llms.txt + llms-full.md
     searchstack llms validate          # validate existing files
     searchstack llms check             # check if your site has llms.txt
 """
@@ -116,7 +116,7 @@ def _generate_llms_txt(config: Config, pages: list[dict]) -> str:
 
 
 def _generate_llms_full_txt(config: Config, pages: list[dict]) -> str:
-    """Generate llms-full.txt (detailed version) with page summaries."""
+    """Generate llms-full content (detailed version) with page summaries."""
     domain = config.domain
     lines = []
 
@@ -243,7 +243,7 @@ def cmd_generate(config: Config) -> None:
     # Save
     output_dir = Path.cwd()
     llms_path = output_dir / "llms.txt"
-    llms_full_path = output_dir / "llms-full.txt"
+    llms_full_path = output_dir / "llms-full.md"
 
     with open(llms_path, "w") as f:
         f.write(llms_txt)
@@ -259,13 +259,13 @@ def cmd_generate(config: Config) -> None:
     print(f"\n  Next steps:")
     print(f"    1. Review and edit the generated files")
     print(f"    2. Host at https://{config.domain}/llms.txt")
-    print(f"    3. Host at https://{config.domain}/llms-full.txt")
+    print(f"    3. Host at https://{config.domain}/llms-full.md")
     print(f"    4. Add to robots.txt or sitemap")
     print(f"    5. Run 'searchstack llms validate' to check")
 
 
 def cmd_validate(config: Config) -> None:
-    """Validate llms.txt and llms-full.txt on the live site."""
+    """Validate llms.txt and llms-full.md on the live site."""
     domain = config.domain
     if not domain:
         print("  No domain configured. Set 'domain' in .searchstack.toml")
@@ -273,11 +273,17 @@ def cmd_validate(config: Config) -> None:
 
     print(f"  Validating llms.txt for {domain}...\n")
 
-    for filename in ["llms.txt", "llms-full.txt"]:
+    for filename in ["llms.txt", "llms-full.md"]:
         url = f"https://{domain}/{filename}"
         print(f"  {filename}:")
 
         content = _fetch(url)
+        resolved_url = url
+        if content is None and filename == "llms-full.md":
+            legacy_url = f"https://{domain}/llms-full.txt"
+            content = _fetch(legacy_url)
+            if content is not None:
+                resolved_url = legacy_url
         if content is None:
             print(f"    NOT FOUND at {url}")
             print(f"    Generate with: searchstack llms generate")
@@ -285,6 +291,8 @@ def cmd_validate(config: Config) -> None:
             continue
 
         print(f"    Found: {len(content)} bytes, {len(content.splitlines())} lines")
+        if resolved_url != url:
+            print(f"    Resolved via legacy path: {resolved_url}")
 
         issues = _validate_llms_txt(content, domain)
 
@@ -327,7 +335,7 @@ def cmd_check(config: Config) -> None:
 
     files_to_check = [
         ("llms.txt", "LLM site description (llmstxt.org spec)"),
-        ("llms-full.txt", "LLM detailed reference"),
+        ("llms-full.md", "LLM detailed reference"),
         ("robots.txt", "Crawler directives"),
         ("sitemap.xml", "Page index for crawlers"),
         (".well-known/ai-plugin.json", "OpenAI plugin manifest"),
@@ -351,19 +359,23 @@ def cmd_check(config: Config) -> None:
     # Check if sitemap references llms files
     sitemap = _fetch(f"https://{domain}/sitemap.xml")
     if sitemap:
-        has_llms = "llms.txt" in sitemap or "llms-full.txt" in sitemap
+        has_llms = (
+            "llms.txt" in sitemap
+            or "llms-full.md" in sitemap
+            or "llms-full.txt" in sitemap
+        )
         if has_llms:
             print(f"\n  sitemap.xml references llms files")
         else:
             print(f"\n  sitemap.xml does NOT reference llms files")
-            print(f"  Consider adding llms.txt and llms-full.txt to your sitemap")
+            print(f"  Consider adding llms.txt and llms-full.md to your sitemap")
 
 
 def run(config: Config, *args: str) -> None:
     """llms.txt generator and validator.
 
     Usage:
-        searchstack llms generate    Generate llms.txt + llms-full.txt from sitemap
+        searchstack llms generate    Generate llms.txt + llms-full.md from sitemap
         searchstack llms validate    Validate existing files on live site
         searchstack llms check       Quick check: does site have AI-ready files?
     """

@@ -33,6 +33,27 @@ def run(config: Config, *args: str) -> None:
         return
 
     summary_tasks = summary_data.get("tasks", [])
+    if summary_tasks and summary_tasks[0].get("status_code") == 40204:
+        print("\nDataForSEO Backlinks API is plan-gated (40204 Access denied).")
+        if config.bing.api_key:
+            print("  Falling back to Bing Webmaster Tools for free inbound links...")
+            from searchstack.providers.bing import get_inbound_links
+            bing_data = get_inbound_links(config)
+            links = bing_data.get("d", []) if isinstance(bing_data, dict) else []
+            if links:
+                print(f"\nBing Webmaster Inbound Links for {target}:")
+                for item in links[:15]:
+                    src = item.get("SourceUrl") or item.get("Url", "")
+                    dst = item.get("TargetUrl", "")
+                    print(f"  • {src}")
+                    if dst:
+                        print(f"    -> {dst}")
+            else:
+                print(f"  No inbound links reported by Bing for {target}.")
+        else:
+            print("  Tip: Configure [bing] api_key in .searchstack.toml for free inbound link checks!")
+        return
+
     summary_result = None
     if summary_tasks and summary_tasks[0].get("result"):
         summary_result = summary_tasks[0]["result"][0]
@@ -64,6 +85,11 @@ def run(config: Config, *args: str) -> None:
         return
 
     ref_tasks = ref_data.get("tasks", [])
+    if ref_tasks and ref_tasks[0].get("status_code") == 40204:
+        print("\nReferring domains API is configured but unavailable for this account.")
+        print(f"  {ref_tasks[0].get('status_message', 'Access denied')}")
+        return
+
     items = []
     if ref_tasks and ref_tasks[0].get("result"):
         items = ref_tasks[0]["result"][0].get("items", [])

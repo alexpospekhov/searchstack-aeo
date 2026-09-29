@@ -1,0 +1,27 @@
+# Preset: B2B SaaS Starter
+domain = "mysaas.com"
+sitemap = "https://mysaas.com/sitemap.xml"
+
+ai_queries = [
+  "What is the best SaaS tool for workflow automation?",
+  "Top alternatives to traditional enterprise software",
+  "How to calculate customer ROI for business software?",
+  "Best cloud software for team collaboration in 2026",
+]
+
+competitors = [
+  "zapier.com",
+  "notion.so",
+  "make.com",
+]
+
+[geo_keywords]
+product = [
+  "workflow automation platform",
+  "enterprise task management tool",
+  "b2b workflow orchestration",
+]
+alternatives = [
+  "zapier alternative",
+  "make alternative open source",
+]

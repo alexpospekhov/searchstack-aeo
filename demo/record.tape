@@ -15,7 +15,7 @@ Sleep 200ms
 Type `cd /tmp`
 Enter
 Sleep 200ms
-Type `alias searchstack="python3 '/Users/Alexvs/HYPERFOCUS OS/Claude/hyperfocus/My Public Gits/SEO:AEO/demo/demo.py'"`
+Type `alias searchstack="python3 demo/demo.py"`
 Enter
 Sleep 200ms
 Type "clear"

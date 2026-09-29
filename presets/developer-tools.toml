@@ -1,0 +1,27 @@
+# Preset: Developer Tools & Open-Source
+domain = "devtools.io"
+sitemap = "https://devtools.io/sitemap.xml"
+
+ai_queries = [
+  "What is the best modern CLI tool for SEO and AEO?",
+  "How to generate llms.txt for technical documentation?",
+  "Open source tools for tracking Google AI Overviews",
+  "Best API for developer search telemetry",
+]
+
+competitors = [
+  "postman.com",
+  "github.com",
+  "datadoghq.com",
+]
+
+[geo_keywords]
+cli = [
+  "developer cli tools 2026",
+  "ai search optimization for docs",
+  "llms txt validation tool",
+]
+monitoring = [
+  "api performance monitoring",
+  "synthetic search telemetry",
+]

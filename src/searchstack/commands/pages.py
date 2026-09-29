@@ -106,8 +106,10 @@ def _short_url(url: str, domain: str) -> str:
 def run(config: Config, *args: str) -> dict[str, Any] | None:
     """Check indexing status for all sitemap URLs via GSC URL Inspection API.
 
-    Returns results dict (also used by report module).
+    Prints realtime progress and returns results dict (also used by report module).
     """
+    import sys
+
     if not config.sitemap:
         print("  No sitemap configured. Set sitemap = \"...\" in .searchstack.toml")
         return None
@@ -124,52 +126,44 @@ def run(config: Config, *args: str) -> dict[str, Any] | None:
         print("  No URLs found in sitemap.")
         return None
 
-    print(f"  Inspecting {len(all_urls)} URLs...\n")
+    total = len(all_urls)
+    print(f"  Inspecting {total} URLs...\n")
+    print(f"  {'':>3} {'#':>4} {'URL':<50}  {'Coverage':<25}  {'Last Crawl':<12}")
+    print(f"  {'':>3} {'────'} {'─' * 50}  {'─' * 25}  {'─' * 12}")
+    sys.stdout.flush()
 
     results: list[dict[str, Any]] = []
     indexed = 0
     not_indexed = 0
     errors = 0
 
-    for url in all_urls:
+    for idx, url in enumerate(all_urls, start=1):
         result = _inspect_url(config, url)
         results.append(result)
 
+        path = _short_url(url, config.domain)
+        if len(path) > 50:
+            path = path[:48] + ".."
+
         if "error" in result:
             errors += 1
-            continue
-
-        verdict = result.get("verdict", "")
-        if verdict.upper() == "PASS":
-            indexed += 1
-        elif verdict.upper() in ("FAIL", "ERROR"):
-            errors += 1
-        else:
-            not_indexed += 1
-
-    # Print table
-    page_w = max(len(_short_url(r["url"], config.domain)) for r in results)
-    page_w = max(page_w, 4)
-    page_w = min(page_w, 50)
-
-    print(f"  {'':>3} {'URL':<{page_w}}  {'Coverage':<25}  {'Last Crawl':<12}")
-    print(f"  {'':>3} {'─' * page_w}  {'─' * 25}  {'─' * 12}")
-
-    for r in results:
-        path = _short_url(r["url"], config.domain)
-        if len(path) > page_w:
-            path = path[:page_w - 2] + ".."
-
-        if "error" in r:
             icon = "\u274c"
-            coverage = f"Error: {r['error'][:20]}"
+            coverage = f"Error: {result['error'][:20]}"
             crawl = ""
         else:
-            icon = _verdict_icon(r.get("verdict", ""))
-            coverage = r.get("coverage_state", "Unknown")
-            crawl = r.get("last_crawl", "")
+            verdict = result.get("verdict", "")
+            if verdict.upper() == "PASS":
+                indexed += 1
+            elif verdict.upper() in ("FAIL", "ERROR"):
+                errors += 1
+            else:
+                not_indexed += 1
+            icon = _verdict_icon(verdict)
+            coverage = result.get("coverage_state", "Unknown")
+            crawl = result.get("last_crawl", "")
 
-        print(f"  {icon:>3} {path:<{page_w}}  {coverage:<25}  {crawl:<12}")
+        print(f"  {icon:>3} {idx:>4}/{total:<4} {path:<50}  {coverage:<25}  {crawl:<12}")
+        sys.stdout.flush()
 
     print(f"\n  Summary: \u2705 {indexed} indexed | \u26a0\ufe0f {not_indexed} not indexed | \u274c {errors} errors")
     print(f"  Total: {len(results)} URLs\n")

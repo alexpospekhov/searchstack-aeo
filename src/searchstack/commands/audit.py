@@ -164,7 +164,7 @@ def _get_volumes_dataforseo(config: Config, keywords: list[str]) -> dict[str, di
         if not tasks or not tasks[0].get("result"):
             continue
 
-        items = tasks[0]["result"][0].get("items", [])
+        items = tasks[0]["result"][0].get("items") or []
         for item in items:
             kw_data = item.get("keyword_data", item)
             info = kw_data.get("keyword_info", {})

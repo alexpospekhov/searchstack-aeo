@@ -51,3 +51,24 @@ def get_site_url(config: Config) -> str:
     if not domain.startswith(("http://", "https://")):
         domain = f"https://{domain}"
     return f"{domain}/"
+
+
+def get_inbound_links(config: Config) -> dict[str, Any]:
+    """Fetch free inbound link counts from Bing Webmaster Tools."""
+    site_url = get_site_url(config)
+    endpoint = f"GetLinkCounts?siteUrl={urllib.request.quote(site_url, safe='')}"
+    return bing_request(config, endpoint)
+
+
+def get_query_stats(config: Config) -> dict[str, Any]:
+    """Fetch organic queries, impressions, and clicks from Bing Webmaster Tools."""
+    site_url = get_site_url(config)
+    endpoint = f"GetQueryStats?siteUrl={urllib.request.quote(site_url, safe='')}"
+    return bing_request(config, endpoint)
+
+
+def get_keyword_stats(config: Config, keyword: str) -> dict[str, Any]:
+    """Fetch free keyword search stats from Bing Webmaster Tools."""
+    endpoint = f"GetKeywordStats?q={urllib.request.quote(keyword, safe='')}"
+    return bing_request(config, endpoint)
+

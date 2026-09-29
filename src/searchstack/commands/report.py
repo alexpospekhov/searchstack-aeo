@@ -80,7 +80,17 @@ def _collect_traffic(config: Config) -> dict[str, Any] | None:
             return None
 
         row = results_list[0] if isinstance(results_list, list) else results_list
-        metrics = row.get("metrics", row) if isinstance(row, dict) else {}
+        raw_metrics = row.get("metrics", row) if isinstance(row, dict) else {}
+        if isinstance(raw_metrics, list):
+            metric_names = ["visitors", "pageviews", "bounce_rate", "visit_duration"]
+            metrics = {
+                name: raw_metrics[idx] if idx < len(raw_metrics) else 0
+                for idx, name in enumerate(metric_names)
+            }
+        elif isinstance(raw_metrics, dict):
+            metrics = raw_metrics
+        else:
+            metrics = {}
 
         # Top pages
         pages_result = query(config, {
@@ -166,7 +176,7 @@ def _collect_gsc_queries(config: Config) -> list[dict[str, Any]] | None:
 
 def _collect_geo(config: Config) -> dict[str, Any] | None:
     """Load latest GEO snapshot."""
-    return snapshots.load_latest_snapshot("geo")
+    return snapshots.load_latest_snapshot("geo_overview") or snapshots.load_latest_snapshot("geo")
 
 
 def _collect_ai(config: Config) -> dict[str, Any] | None:
@@ -330,6 +340,8 @@ def _collect_backlinks(config: Config) -> dict[str, Any] | None:
             return None
 
         tasks = result.get("tasks", [])
+        if tasks and tasks[0].get("status_code") == 40204:
+            return {"access_denied": True, "message": tasks[0].get("status_message", "Access denied")}
         if not tasks or not tasks[0].get("result"):
             return None
 
@@ -492,7 +504,6 @@ def _section_traffic(L: list[str], data: dict[str, Any] | None) -> None:
         return
 
     metrics = data.get("metrics", {})
-    visitors = metrics.get("visitors", metrics[0]) if isinstance(metrics, (list, dict)) else 0
     if isinstance(metrics, dict):
         visitors = metrics.get("visitors", 0)
         pageviews = metrics.get("pageviews", 0)
@@ -667,6 +678,11 @@ def _section_backlinks(L: list[str], data: dict[str, Any] | None) -> None:
     if data is None:
         L.append("*DataForSEO not configured.*\n")
         return
+    if data.get("access_denied"):
+        message = data.get("message", "Access denied")
+        L.append(f"*Backlinks API is configured but unavailable for the current DataForSEO plan.*\n")
+        L.append(f"*Vendor message: {message}*\n")
+        return
 
     L.append(f"| Metric | Value |")
     L.append(f"|--------|-------|")
@@ -791,7 +807,7 @@ def _section_recommendations(
             recs.append(f"Investigate {not_indexed} pages not indexed by Google")
 
     # Backlinks
-    if backlinks:
+    if backlinks and not backlinks.get("access_denied"):
         broken = backlinks.get("broken_backlinks", 0)
         if broken > 0:
             recs.append(f"Reclaim {broken:,} broken backlinks (301 redirects or outreach)")
@@ -862,8 +878,10 @@ def _build_executive_summary(
         lines.append("- **AI Citations:** N/A")
 
     # Backlinks
-    if backlinks:
+    if backlinks and not backlinks.get("access_denied"):
         lines.append(f"- **Backlinks:** {backlinks.get('total_backlinks', 0):,} ({backlinks.get('referring_domains', 0):,} domains)")
+    elif backlinks and backlinks.get("access_denied"):
+        lines.append("- **Backlinks:** plan-gated in current DataForSEO account")
     else:
         lines.append("- **Backlinks:** N/A")
 

@@ -1,0 +1,96 @@
+# searchstack configuration template
+# Copy to .searchstack.toml and customize for your domain.
+
+domain = "example.com"
+sitemap = "https://example.com/sitemap.xml"
+
+# High-intent prompts to monitor AI citations (ChatGPT, Perplexity, Claude, Grok, Gemini)
+ai_queries = [
+  "What is the best developer tool for API monitoring?",
+  "Top alternatives to traditional SEO suites in 2026",
+  "How to track Google AI Overviews programmatically?",
+  "Best open-source AEO and GEO optimization software",
+]
+
+# Competitors to track across organic SERP and AI Overviews
+competitors = [
+  "competitor-one.com",
+  "competitor-two.com",
+]
+
+[gsc]
+credentials_file = "credentials.json"
+site_url = "sc-domain:example.com"
+# gcp_project = "my-gcp-project"  # optional
+
+[dataforseo]
+# login = "api-login@example.com"
+# password = "api-password"
+location_code = 2840  # 2840 = United States
+language_code = "en"
+
+[plausible]
+site_id = "example.com"
+# api_key = "..."  # or PLAUSIBLE_API_KEY env var
+
+# ---------------------------------------------------------------------------
+# AI Citation Providers (Native Direct Keys)
+# ---------------------------------------------------------------------------
+# [openai]
+# api_key = "sk-..."  # or OPENAI_API_KEY
+
+# [perplexity]
+# api_key = "pplx-..."  # or PERPLEXITY_API_KEY
+
+# [anthropic]
+# api_key = "sk-ant-..."  # or ANTHROPIC_API_KEY
+
+# [grok]
+# api_key = "xai-..."  # or XAI_API_KEY
+
+# [gemini]
+# api_key = "AIza..."  # or GEMINI_API_KEY (supports Google Search grounding)
+
+# ---------------------------------------------------------------------------
+# Unified OpenRouter Routing (Alternative: 1 key for all AI providers)
+# ---------------------------------------------------------------------------
+# [openrouter]
+# api_key = "sk-or-..."  # or OPENROUTER_API_KEY
+# chatgpt_model = "openai/gpt-4o-mini"
+# claude_model = "anthropic/claude-haiku-4.5"
+# perplexity_model = "perplexity/sonar"
+# grok_model = "x-ai/grok-3-mini"
+
+# ---------------------------------------------------------------------------
+# Local Models (Ollama)
+# ---------------------------------------------------------------------------
+# [ollama]
+# base_url = "http://localhost:11434/v1"
+# model = "llama3.2"
+
+# ---------------------------------------------------------------------------
+# Search Engines & Submission
+# ---------------------------------------------------------------------------
+# [bing]
+# api_key = "..."  # or BING_WEBMASTER_API_KEY
+
+# [indexnow]
+# key = "your-indexnow-api-key"
+
+# [google_ads]
+# customer_id = "1234567890"  # no dashes
+# developer_token = "..."
+
+# ---------------------------------------------------------------------------
+# Google AI Overview (GEO) Keyword Clusters
+# ---------------------------------------------------------------------------
+[geo_keywords]
+core = [
+  "ai search visibility tracking",
+  "open source aeo tool",
+  "monitor google ai overviews",
+]
+features = [
+  "llms.txt generator and validator",
+  "automated indexnow submission",
+]
