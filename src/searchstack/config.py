@@ -52,6 +52,12 @@ class ApiKeyConfig:
 
 
 @dataclass
+class CloroConfig:
+    api_key: str = ""
+    country: str = "US"
+
+
+@dataclass
 class PlausibleConfig:
     api_key: str = ""
     site_id: str = ""
@@ -114,6 +120,7 @@ class Config:
     grok: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     gemini: ApiKeyConfig = field(default_factory=ApiKeyConfig)
     ollama: OllamaConfig = field(default_factory=OllamaConfig)
+    cloro: CloroConfig = field(default_factory=CloroConfig)
     openrouter: OpenrouterConfig = field(default_factory=OpenrouterConfig)
     plausible: PlausibleConfig = field(default_factory=PlausibleConfig)
     bing: ApiKeyConfig = field(default_factory=ApiKeyConfig)
@@ -209,6 +216,10 @@ def _build_config(raw: dict[str, Any]) -> Config:
             model=_get_nested(raw, "ollama", "model"),
             api_key=_get_nested(raw, "ollama", "api_key"),
         ),
+        cloro=CloroConfig(
+            api_key=_get_nested(raw, "cloro", "api_key"),
+            country=_get_nested(raw, "cloro", "country") or "US",
+        ),
         openrouter=OpenrouterConfig(
             api_key=_get_nested(raw, "openrouter", "api_key"),
             base_url=_get_nested(raw, "openrouter", "base_url") or "https://openrouter.ai/api/v1",
@@ -248,6 +259,7 @@ _ENV_MAP: dict[str, tuple[str, ...]] = {
     "GROK_API_KEY": ("grok", "api_key"),
     "GEMINI_API_KEY": ("gemini", "api_key"),
     "OPENROUTER_API_KEY": ("openrouter", "api_key"),
+    "CLORO_API_KEY": ("cloro", "api_key"),
     "PLAUSIBLE_API_KEY": ("plausible", "api_key"),
     "BING_WEBMASTER_API_KEY": ("bing", "api_key"),
     "GOOGLE_ADS_DEVELOPER_TOKEN": ("google_ads", "developer_token"),
@@ -353,6 +365,7 @@ def _overlay_secret_manager(cfg: Config) -> None:
         ("grok", "api_key"): "xai-api-key",
         ("gemini", "api_key"): "gemini-api-key",
         ("openrouter", "api_key"): "openrouter-api-key",
+        ("cloro", "api_key"): "cloro-api-key",
         ("plausible", "api_key"): "plausible-api-key",
         ("bing", "api_key"): "bing-webmaster-api-key",
     }

@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+from functools import partial
+
 from searchstack import snapshots
 from searchstack.config import Config
 
-PROVIDERS = ("chatgpt", "perplexity", "claude", "grok", "gemini", "ollama")
+PROVIDERS = (
+    "chatgpt", "perplexity", "claude", "grok", "gemini", "ollama",
+    "cloro-chatgpt", "cloro-aimode", "cloro-gemini",
+)
 
 
 def _check_provider(
@@ -60,6 +65,12 @@ def _check_provider(
             return {"provider": provider, "results": [], "cited": 0, "total": 0}
         from searchstack.providers import ollama
         check_fn = ollama.check_citation
+    elif provider.startswith("cloro-"):
+        if not config.cloro.api_key:
+            print(f"  Skipping {provider} -- CLORO_API_KEY not configured")
+            return {"provider": provider, "results": [], "cited": 0, "total": 0}
+        from searchstack.providers import cloro
+        check_fn = partial(cloro.check_citation, engine=cloro.ENGINES[provider])
     else:
         print(f"  Unknown provider: {provider}")
         return {"provider": provider, "results": [], "cited": 0, "total": 0}
@@ -170,6 +181,9 @@ def run(config: Config, *args: str) -> None:
             "claude": "Claude (haiku)",
             "grok": "Grok (grok-3-mini)",
             "ollama": f"Ollama ({config.ollama.model or 'not configured'})",
+            "cloro-chatgpt": "ChatGPT web app (cloro)",
+            "cloro-aimode": "Google AI Mode (cloro)",
+            "cloro-gemini": "Gemini web app (cloro)",
         }.get(provider, provider)
 
         print(f"  {label}:")

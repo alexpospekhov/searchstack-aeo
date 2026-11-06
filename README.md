@@ -269,7 +269,7 @@ searchstack --preset saas-starter report  # run with preset config
 
 ## Services
 
-12 integrations. None required — each command gracefully skips unavailable services.
+13 integrations. None required — each command gracefully skips unavailable services.
 
 | # | Service | Cost | What it unlocks |
 |---|---------|------|----------------|
@@ -285,6 +285,7 @@ searchstack --preset saas-starter report  # run with preset config
 | 10 | **[Bing Webmaster](https://www.bing.com/webmasters)** | Free | Bing stats, URL submission, free backlinks |
 | 11 | **[IndexNow](https://www.indexnow.org)** | Free | Instant Bing/Yandex notification |
 | 12 | **[Ollama](https://ollama.com)** / any local LLM | Free | Test local models (Qwen, Llama, Mistral, Gemma) |
+| 13 | **[cloro](https://cloro.dev?utm_source=searchstack-aeo&utm_medium=byok)** | Free 500 credits/mo, then paid plans | Answers from the ChatGPT, AI Mode and Gemini web apps with sources; AI Overview for `geo` |
 
 **Why Bing matters:** ChatGPT Search, Perplexity, and Microsoft Copilot all use Bing as their search backend. If you're not in Bing, you're invisible to 3 major AI search products.
 
@@ -407,6 +408,7 @@ export ANTHROPIC_API_KEY="sk-ant-..."    export XAI_API_KEY="xai-..."
 export GEMINI_API_KEY="AIza..."          export OPENROUTER_API_KEY="sk-or-..."
 export PLAUSIBLE_API_KEY="key"           export BING_WEBMASTER_API_KEY="key"
 export DATAFORSEO_LOGIN="email"          export DATAFORSEO_PASSWORD="pass"
+export CLORO_API_KEY="key"
 ```
 
 Full config template: [docs/SERVICES.md](docs/SERVICES.md#full-config-file-template)
@@ -423,6 +425,7 @@ src/searchstack/
 ├── providers/          # API clients (one per service)
 │   ├── gsc.py            # Google Search Console (OAuth flow + Discover)
 │   ├── dataforseo.py     # DataForSEO (SERP, PAA, UGC forums, async GEO)
+│   ├── cloro.py          # cloro (ChatGPT, AI Mode, Gemini web answers; AI Overview)
 │   ├── gemini.py         # Google Gemini (Google Search Grounding)
 │   ├── plausible.py      # Plausible Analytics
 │   ├── bing.py           # Bing Webmaster (inbound links & stats)

@@ -52,6 +52,14 @@ site_id = "example.com"
 # api_key = "AIza..."  # or GEMINI_API_KEY (supports Google Search grounding)
 
 # ---------------------------------------------------------------------------
+# cloro (answers from the ChatGPT, AI Mode and Gemini web apps, with sources;
+# Google results with the AI Overview for `geo` when DataForSEO is not set)
+# ---------------------------------------------------------------------------
+# [cloro]
+# api_key = "..."  # or CLORO_API_KEY
+# country = "US"   # ISO 3166-1 alpha-2
+
+# ---------------------------------------------------------------------------
 # Unified OpenRouter Routing (Alternative: 1 key for all AI providers)
 # ---------------------------------------------------------------------------
 # [openrouter]
