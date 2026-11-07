@@ -1,7 +1,8 @@
 """GEO -- Google AI Overview monitor.
 
 Checks whether Google's AI Overview cites your domain for target keywords.
-Uses DataForSEO SERP API with AI Overview extraction.
+Uses DataForSEO SERP API with AI Overview extraction. When DataForSEO is not
+configured and a cloro API key is set, uses cloro's Google endpoint instead.
 """
 
 from __future__ import annotations
@@ -88,13 +89,15 @@ def run(config: Config, *args: str) -> None:
         searchstack geo                    # all configured keywords
         searchstack geo "your keyword"     # single keyword check
     """
-    if not config.dataforseo.login or not config.dataforseo.password:
+    use_dataforseo = bool(config.dataforseo.login and config.dataforseo.password)
+    if not use_dataforseo and not config.cloro.api_key:
         print("DataForSEO credentials not configured.")
         print("Set dataforseo.login and dataforseo.password in .searchstack.toml")
         print("or DATAFORSEO_LOGIN / DATAFORSEO_PASSWORD environment variables.")
+        print("Or set cloro.api_key (CLORO_API_KEY) to use cloro instead.")
         return
 
-    from searchstack.providers import dataforseo
+    from searchstack.providers import cloro, dataforseo
 
     # Gather keywords
     if args:
@@ -122,33 +125,43 @@ def run(config: Config, *args: str) -> None:
     all_cited_domains: dict[str, int] = {}
 
     for keyword in keywords:
-        try:
-            serp_data = dataforseo.serp_regular(
-                keyword=keyword,
-                location_code=config.dataforseo.location_code,
-                language_code=config.dataforseo.language_code,
-                config=config,
-                load_ai_overview=True,
-            )
-        except Exception as e:
-            print(f"    {keyword}")
-            print(f"      error: {e}")
-            results.append({"keyword": keyword, "error": str(e)})
-            continue
+        if not use_dataforseo:
+            cloro_result = cloro.google_search(keyword=keyword, config=config)
+            if "error" in cloro_result:
+                print(f"    {keyword}")
+                print(f"      error: {cloro_result['error']}")
+                results.append({"keyword": keyword, "error": cloro_result["error"]})
+                continue
+            ai_info = cloro.parse_ai_overview(cloro_result, config.domain)
+            organic = cloro.parse_organic(cloro_result, config.domain)
+        else:
+            try:
+                serp_data = dataforseo.serp_regular(
+                    keyword=keyword,
+                    location_code=config.dataforseo.location_code,
+                    language_code=config.dataforseo.language_code,
+                    config=config,
+                    load_ai_overview=True,
+                )
+            except Exception as e:
+                print(f"    {keyword}")
+                print(f"      error: {e}")
+                results.append({"keyword": keyword, "error": str(e)})
+                continue
 
-        # Parse the first task result
-        task_result = _extract_task_result(serp_data)
-        if task_result is None:
-            print(f"    {keyword}")
-            print(f"      no result data")
-            results.append({"keyword": keyword, "error": "no result data"})
-            continue
+            # Parse the first task result
+            task_result = _extract_task_result(serp_data)
+            if task_result is None:
+                print(f"    {keyword}")
+                print(f"      no result data")
+                results.append({"keyword": keyword, "error": "no result data"})
+                continue
 
-        items = task_result.get("items", [])
+            items = task_result.get("items", [])
 
-        # AI Overview analysis
-        ai_info = _parse_ai_overview(task_result, config.domain)
-        organic = _parse_organic(items, config.domain)
+            # AI Overview analysis
+            ai_info = _parse_ai_overview(task_result, config.domain)
+            organic = _parse_organic(items, config.domain)
 
         if ai_info["ai_present"]:
             ai_present_count += 1

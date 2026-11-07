@@ -48,7 +48,8 @@ Usage: searchstack [options] [command] [args...]
        searchstack                Run full report (all sections)
 
 AEO / GEO:
-  ai [provider]        AI citation check (chatgpt, perplexity, claude, grok, gemini, ollama)
+  ai [provider]        AI citation check (chatgpt, perplexity, claude, grok, gemini, ollama,
+                       cloro-chatgpt, cloro-aimode, cloro-gemini, cloro-bing-aimode)
   geo [keyword]        Google AI Overview monitor
   entity "brand"       Google Knowledge Graph authority & entity check
   doctor               Live provider + entitlement health check
