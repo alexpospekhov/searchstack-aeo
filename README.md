@@ -285,7 +285,7 @@ searchstack --preset saas-starter report  # run with preset config
 | 10 | **[Bing Webmaster](https://www.bing.com/webmasters)** | Free | Bing stats, URL submission, free backlinks |
 | 11 | **[IndexNow](https://www.indexnow.org)** | Free | Instant Bing/Yandex notification |
 | 12 | **[Ollama](https://ollama.com)** / any local LLM | Free | Test local models (Qwen, Llama, Mistral, Gemma) |
-| 13 | **[cloro](https://cloro.dev?utm_source=searchstack-aeo&utm_medium=byok)** | Free 500 credits/mo, then paid plans | Answers from the ChatGPT, AI Mode and Gemini web apps with sources; AI Overview for `geo` |
+| 13 | **[cloro](https://cloro.dev?utm_source=searchstack-aeo&utm_medium=byok)** | Free 500 credits/mo, then paid plans | Answers from the ChatGPT, AI Mode, Gemini and Bing AI Mode web apps with sources; AI Overview for `geo` |
 
 **Why Bing matters:** ChatGPT Search, Perplexity, and Microsoft Copilot all use Bing as their search backend. If you're not in Bing, you're invisible to 3 major AI search products.
 
@@ -425,7 +425,7 @@ src/searchstack/
 ├── providers/          # API clients (one per service)
 │   ├── gsc.py            # Google Search Console (OAuth flow + Discover)
 │   ├── dataforseo.py     # DataForSEO (SERP, PAA, UGC forums, async GEO)
-│   ├── cloro.py          # cloro (ChatGPT, AI Mode, Gemini web answers; AI Overview)
+│   ├── cloro.py          # cloro (ChatGPT, AI Mode, Gemini, Bing AI Mode web answers; AI Overview)
 │   ├── gemini.py         # Google Gemini (Google Search Grounding)
 │   ├── plausible.py      # Plausible Analytics
 │   ├── bing.py           # Bing Webmaster (inbound links & stats)

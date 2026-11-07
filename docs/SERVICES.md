@@ -22,7 +22,7 @@ Step-by-step instructions for connecting every external service that searchstack
 | 10 | [Bing Webmaster](#10-bing-webmaster-tools) | Recommended | Free | `[bing]` | `BING_WEBMASTER_API_KEY` | `bing`, `backlinks` |
 | 11 | [IndexNow](#11-indexnow) | Recommended | Free | `[indexnow]` | — | `indexnow` |
 | 12 | [Google Ads Keyword Planner](#12-google-ads-keyword-planner-optional) | Optional | Free (needs Ads account) | `[google_ads]` | `GOOGLE_ADS_DEVELOPER_TOKEN` | `audit` (volume data) |
-| 13 | [cloro](#11-cloro-optional) | Optional | Free 500 credits/mo, then paid plans | `[cloro]` | `CLORO_API_KEY` | `ai cloro-chatgpt`, `ai cloro-aimode`, `ai cloro-gemini`, `geo` (without DataForSEO) |
+| 13 | [cloro](#11-cloro-optional) | Optional | Free 500 credits/mo, then paid plans | `[cloro]` | `CLORO_API_KEY` | `ai cloro-chatgpt`, `ai cloro-aimode`, `ai cloro-gemini`, `ai cloro-bing-aimode`, `geo` (without DataForSEO) |
 
 Every key goes into **one of two places:**
 
@@ -537,9 +537,9 @@ export GOOGLE_ADS_DEVELOPER_TOKEN="your-dev-token"
 
 ## 11. cloro (Optional)
 
-**What it gives you:** The answers that the ChatGPT, Google AI Mode and Gemini web apps show to users, with the source URLs they cite. The model APIs in sections 3 to 6 do not return these answers. cloro also returns Google results with the AI Overview, which `geo` uses when DataForSEO is not configured.
+**What it gives you:** The answers that the ChatGPT, Google AI Mode, Gemini and Bing AI Mode web apps show to users, with the source URLs they cite. The model APIs in sections 3 to 6 do not return these answers. cloro also returns Google results with the AI Overview, which `geo` uses when DataForSEO is not configured.
 
-**Cost:** Credits per request: ChatGPT 7, AI Mode 6, Gemini 6, Google with AI Overview 7. The free plan has 500 credits a month. See [cloro.dev/pricing](https://cloro.dev/pricing?utm_source=searchstack-aeo&utm_medium=byok).
+**Cost:** Credits per request: ChatGPT 7, AI Mode 6, Gemini 6, Bing AI Mode 6, Google with AI Overview 7. The free plan has 500 credits a month. See [cloro.dev/pricing](https://cloro.dev/pricing?utm_source=searchstack-aeo&utm_medium=byok).
 
 ### Step 1: Get API key
 
@@ -565,7 +565,7 @@ export CLORO_API_KEY="..."
 
 ### What searchstack does with it
 
-- `searchstack ai cloro-chatgpt`, `cloro-aimode` and `cloro-gemini` send each query from `ai_queries` to that web app and check if your domain is in the cited sources or the answer text
+- `searchstack ai cloro-chatgpt`, `cloro-aimode`, `cloro-gemini` and `cloro-bing-aimode` send each query from `ai_queries` to that web app and check if your domain is in the cited sources or the answer text
 - `searchstack geo` uses cloro for the Google results and AI Overview sources when `[dataforseo]` is not set. If both are set, `geo` uses DataForSEO
 
 ---

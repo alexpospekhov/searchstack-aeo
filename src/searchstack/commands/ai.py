@@ -9,7 +9,7 @@ from searchstack.config import Config
 
 PROVIDERS = (
     "chatgpt", "perplexity", "claude", "grok", "gemini", "ollama",
-    "cloro-chatgpt", "cloro-aimode", "cloro-gemini",
+    "cloro-chatgpt", "cloro-aimode", "cloro-gemini", "cloro-bing-aimode",
 )
 
 
@@ -184,6 +184,7 @@ def run(config: Config, *args: str) -> None:
             "cloro-chatgpt": "ChatGPT web app (cloro)",
             "cloro-aimode": "Google AI Mode (cloro)",
             "cloro-gemini": "Gemini web app (cloro)",
+            "cloro-bing-aimode": "Bing AI Mode (cloro)",
         }.get(provider, provider)
 
         print(f"  {label}:")

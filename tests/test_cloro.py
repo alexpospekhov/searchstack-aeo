@@ -71,6 +71,30 @@ AIMODE_RESULT = {
     },
 }
 
+BING_AIMODE_RESULT = {
+    "success": True,
+    "result": {
+        "text": "The ASICS Gel Pulse 15, Brooks Glycerin 21, and Saucony Guide 19 are good picks.",
+        "sources": [
+            {
+                "position": 1,
+                "label": "Best Running Shoes Under $150 in 2026: 8 Picks Worth the Money",
+                "url": "https://runninggearlab.com/best-running-shoes-under-150/",
+                "description": "The best running shoes under $150 in 2026.",
+            },
+        ],
+        "citationPills": [
+            {
+                "position": 1,
+                "label": "Best Running Shoes Under $150 in 2026: 8 Picks Worth the Money",
+                "url": "https://runninggearlab.com/best-running-shoes-under-150/",
+                "domain": "runninggearlab.com",
+                "citationPillId": 1,
+            },
+        ],
+    },
+}
+
 BAD_KEY = {
     "success": False,
     "error": {"code": "INVALID_API_KEY_FORMAT", "message": "Invalid API key format"},
@@ -110,6 +134,17 @@ class TestCloroProvider(unittest.TestCase):
             result = cloro.check_citation(_config(), "best rank tracker", "mysaas.com", engine="aimode")
         self.assertFalse(result["cited"])
         self.assertEqual(result["citations"], ["https://competitor.com/top-tools/"])
+
+    def test_check_citation_bing_aimode(self):
+        with patch("requests.post", return_value=_resp(BING_AIMODE_RESULT)) as post:
+            result = cloro.check_citation(
+                _config(), "best running shoes", "runninggearlab.com", engine="bing/aimode"
+            )
+        self.assertEqual(post.call_args.args[0], "https://api.cloro.dev/v1/monitor/bing/aimode")
+        self.assertEqual(post.call_args.kwargs["json"], {"prompt": "best running shoes", "country": "US"})
+        self.assertTrue(result["cited"])
+        self.assertEqual(result["citations"], ["https://runninggearlab.com/best-running-shoes-under-150/"])
+        self.assertEqual(result["model"], "cloro/bing/aimode")
 
     def test_error_body_is_reported(self):
         with patch("requests.post", return_value=_resp(BAD_KEY, status=401)):
@@ -169,6 +204,14 @@ class TestCloroCommands(unittest.TestCase):
             result = ai._check_provider("cloro-gemini", ["best rank tracker"], _config())
         self.assertEqual(post.call_args.args[0], "https://api.cloro.dev/v1/monitor/gemini")
         self.assertEqual(result["cited"], 1)
+        self.assertEqual(result["total"], 1)
+
+    def test_ai_cloro_bing_aimode_provider(self):
+        with patch("requests.post", return_value=_resp(BING_AIMODE_RESULT)) as post, \
+                patch("sys.stdout", io.StringIO()):
+            result = ai._check_provider("cloro-bing-aimode", ["best running shoes"], _config())
+        self.assertEqual(post.call_args.args[0], "https://api.cloro.dev/v1/monitor/bing/aimode")
+        self.assertEqual(result["cited"], 0)
         self.assertEqual(result["total"], 1)
 
 

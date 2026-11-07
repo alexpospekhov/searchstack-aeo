@@ -52,8 +52,9 @@ site_id = "example.com"
 # api_key = "AIza..."  # or GEMINI_API_KEY (supports Google Search grounding)
 
 # ---------------------------------------------------------------------------
-# cloro (answers from the ChatGPT, AI Mode and Gemini web apps, with sources;
-# Google results with the AI Overview for `geo` when DataForSEO is not set)
+# cloro (answers from the ChatGPT, AI Mode, Gemini and Bing AI Mode web apps,
+# with sources; Google results with the AI Overview for `geo` when DataForSEO
+# is not set)
 # ---------------------------------------------------------------------------
 # [cloro]
 # api_key = "..."  # or CLORO_API_KEY

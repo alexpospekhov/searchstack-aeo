@@ -1,7 +1,8 @@
 """cloro API provider.
 
 cloro returns parsed results from the consumer interfaces of ChatGPT,
-Google AI Mode and Gemini, and Google results with the AI Overview.
+Google AI Mode, Gemini and Bing AI Mode, and Google results with the
+AI Overview.
 Docs: https://cloro.dev/docs?utm_source=searchstack-aeo&utm_medium=byok
 
 Key from `config.cloro.api_key` (env CLORO_API_KEY).
@@ -23,6 +24,7 @@ ENGINES = {
     "cloro-chatgpt": "chatgpt",
     "cloro-aimode": "aimode",
     "cloro-gemini": "gemini",
+    "cloro-bing-aimode": "bing/aimode",
 }
 
 
@@ -112,9 +114,9 @@ def parse_organic(result: dict[str, Any], domain: str) -> dict[str, Any]:
 
 
 def check_citation(config: Config, query_text: str, domain: str, *, engine: str) -> dict[str, object]:
-    """Send a prompt to ChatGPT, AI Mode or Gemini through cloro; check whether *domain* is cited.
+    """Send a prompt to an AI engine through cloro; check whether *domain* is cited.
 
-    *engine* is "chatgpt", "aimode" or "gemini".
+    *engine* is "chatgpt", "aimode", "gemini" or "bing/aimode".
 
     Returns:
         {"cited": bool, "text": str, "citations": list[str], "model": str, "error": str | None}
