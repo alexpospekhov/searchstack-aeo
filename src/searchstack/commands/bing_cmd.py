@@ -17,7 +17,14 @@ _UA = "Mozilla/5.0 SearchStack/1.0"
 # Sitemap
 # ---------------------------------------------------------------------------
 
-def _fetch_sitemap_urls(sitemap_url: str) -> list[str]:
+def _fetch_sitemap_urls(sitemap_url: str, _seen: set[str] | None = None) -> list[str]:
+    if _seen is None:
+        _seen = set()
+    if sitemap_url in _seen:
+        # Sitemap index cycle (or repeat listing): stop instead of
+        # recursing forever. Also dedupes repeated sub-sitemaps.
+        return []
+    _seen.add(sitemap_url)
     req = urllib.request.Request(sitemap_url, headers={"User-Agent": _UA})
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
@@ -30,7 +37,7 @@ def _fetch_sitemap_urls(sitemap_url: str) -> list[str]:
         nested = re.findall(r"<loc>\s*(.*?)\s*</loc>", body)
         all_urls: list[str] = []
         for sub_url in nested:
-            all_urls.extend(_fetch_sitemap_urls(sub_url))
+            all_urls.extend(_fetch_sitemap_urls(sub_url, _seen))
         return all_urls
 
     return re.findall(r"<loc>\s*(.*?)\s*</loc>", body)
